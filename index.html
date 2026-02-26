@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#004d40">
+  <title>Clínica Hope</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html, body { width:100%; height:100%; overflow:hidden; background:#004d40; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; }
+
+    /* ======= IFRAME DO SISTEMA ======= */
+    #app-frame {
+      position:fixed; top:0; left:0; width:100%; height:100%;
+      border:none; z-index:1;
+    }
+
+    /* ======= SPLASH / INSTALAÇÃO ======= */
+    #splash {
+      position:fixed; top:0; left:0; right:0; bottom:0;
+      z-index:9999;
+      background: linear-gradient(160deg, #00251a 0%, #004d40 40%, #00695c 70%, #00897b 100%);
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      padding:24px; text-align:center; color:white;
+      transition: opacity 0.5s ease;
+    }
+    #splash.hidden { opacity:0; pointer-events:none; }
+    #splash img.logo { width:180px; height:auto; margin-bottom:16px; filter:drop-shadow(0 4px 20px rgba(0,0,0,0.4)); }
+    #splash h1 { font-size:1.8rem; font-weight:800; margin-bottom:6px; text-shadow:0 2px 8px rgba(0,0,0,0.3); }
+    #splash .subtitle { font-size:1rem; opacity:0.85; margin-bottom:32px; line-height:1.5; max-width:320px; }
+
+    /* Card de instrução */
+    .install-card {
+      background:rgba(255,255,255,0.12); border-radius:16px; padding:20px 24px;
+      width:100%; max-width:360px; margin-bottom:20px;
+      backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,0.15);
+    }
+    .install-card h3 { font-size:1.1rem; margin-bottom:12px; }
+    .install-steps { text-align:left; }
+    .install-steps > div {
+      display:flex; align-items:center; gap:10px;
+      padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.1);
+      font-size:0.95rem; line-height:1.4;
+    }
+    .install-steps > div:last-child { border-bottom:none; }
+    .step-num {
+      background:rgba(255,255,255,0.25); border-radius:50%; width:28px; height:28px;
+      display:flex; align-items:center; justify-content:center; flex-shrink:0;
+      font-weight:700; font-size:0.85rem;
+    }
+
+    /* Botão instalar (Chrome) */
+    .btn-install {
+      background:white; color:#004d40; border:none; border-radius:14px;
+      padding:16px 40px; font-size:1.1rem; font-weight:700; cursor:pointer;
+      width:100%; max-width:360px; margin-bottom:12px;
+      box-shadow:0 4px 20px rgba(0,0,0,0.3);
+      transition:transform 0.2s;
+    }
+    .btn-install:active { transform:scale(0.97); }
+
+    /* Botão pular */
+    .btn-skip {
+      background:transparent; border:1px solid rgba(255,255,255,0.3); border-radius:10px;
+      color:rgba(255,255,255,0.7); padding:12px 32px; font-size:0.95rem; cursor:pointer;
+      transition:background 0.2s;
+    }
+    .btn-skip:hover { background:rgba(255,255,255,0.08); }
+
+    /* Loading indicator */
+    #loading {
+      position:fixed; top:0; left:0; right:0; bottom:0;
+      background:#004d40; z-index:5;
+      display:flex; align-items:center; justify-content:center;
+      color:white; font-size:1rem;
+    }
+    #loading.hidden { display:none; }
+    .spinner { width:40px; height:40px; border:4px solid rgba(255,255,255,0.2);
+      border-top-color:white; border-radius:50%; animation:spin 0.8s linear infinite; margin-right:12px; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<!-- Loading enquanto iframe carrega -->
+<div id="loading">
+  <div class="spinner"></div>
+  <span>Carregando sistema...</span>
+</div>
+
+<!-- Iframe do sistema GAS -->
+<iframe id="app-frame" src="about:blank" onload="if(this.src!=='about:blank')document.getElementById('loading').classList.add('hidden')"></iframe>
+
+<!-- Splash de instalação -->
+<div id="splash">
+  <img class="logo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAYAAAA9zQYyAAAeMElEQVR42u1da5BlV1X+1rnn9nt6Mj2PzCuZzGRIAoGMoyaamMIIVZgqCgWlBOUhCBEUNYKlEsESUQoqBQViIVBqBSkeylNQsBKigLwkQgBJIJlX5pHJvLp7eh79vI/lj/2tnN1n7u2+03P7nHNv71V1q7tv38c5e3/7299ea+21RVW/gWDBOtsUQA+AgzGAvtAewboE0L0x/wgWrNMBrQA0Cm0RrJssADpYAHSwYAHQwYIFQAcLFgAdLAA6WLAA6GDBAqCDBQuADhYsADpYAHSwYAHQwYIFQAcLFgAdLFgAdLAA6GDBAqCDBQuA7goT/rRtQP5zaQvb3QKgC28VArXMRx1AtQnw44v43AD+JVgcmqBlqzcggDqAywGsSrHzOIAzHlPXAFwGYC2A/Wx3XQDIJT7mUjOAhG4IgF6MAaUFECsBOUn2FYL0Kr7ucT6vAAbI1GlJMgxgiP+rLfC9db52FYDDHuv3eN8RLEiOC8DcS7Bok/9HADZ6DLuaYFX+vYH/20/ZYeCdBHDaA2wdrvZJBOAUB0YzQIs3KGZSz28ma2vqtXU+FhucAdBdDOYYwNYUOITAsN+rAAYB9PN1k/y9TmANA3iCg0JSbRp7n1vz2H2czCuLLDJ7AUzze4ydQQliM0aF3zPgXVd1pYM6WsH3fQzArLdYexrBZqCpAzjr6eNpJFWmevhcMwBpiulXkXEr/LvXY9W03DC5ct6bHQZ4rerJoG0ArqQuvxzADgBrVjqoV6KGFoJrAMB6AGME2ixZu4fSoERAb2E7zRBI5SZgbPQ9NbJ8L78LZNNBsnV6cWglrQYJ1BkCu4+/2+yynbLmqCdf+nitZQAnF1l4BobuwvuuARhhx1cJ3lNcuG3h/40Vh8jcNQJy1gO3LrC4qxOYR6m1DwI4RD3eaADUCebzvK71AK72JAt4bWOcYYyUSgT8Pr52iNfqD5QV4SVZSYDW1H1PEzgjBNIkwbSfLLmdzH2OetkAPsDnz3ChVk0xtgGpl59T5mCJCajzi8iOfgL2CQ6A4xxMNquUAIzy/T5YbcE46t2TeKxf4nVLAHRnygrxOnSrp3v9heE4wdrjseIggAME0TUEo3lEprzfTxEgOznd22cPklX7yZZTnq41GTLTwNth1xRz4PTwf2X+XU1Jj2aemRl+RuSx8jZq7LVoHPQJgC4wkM0DUPGm/WlO3z6AjKVnCa45/j3M/x0lyLfw7wGyuLFdBOd/NqbexscGatgxft6ox57GpOOebEHKvadIAir1Ji68VtoABO/lHJR7CeiNWNgPHgBdIDBXyWibyMoDfH6UjDngTfPGaGP0DkQE56DnyTjB967iND7LgdLjMeoYGf0oAf4YgAlex2QDr4Pwc854LGrPVygxIu+5frJ8zJ99mO+PTq8LBj29P0A9fZKv38cB28d2UE+aBEAXEMxr4aJ35jeueC64cbKnz04lvs58xef4+j4+Vybw9nigOuoxqHrTe5WP2PMwRGgeQIma3MOM99klDqoZz9MyxRlhLjU45wj+EQ4ykJ3HeC8xXz/D19Uon4YwP8QeAF0QMK9hZ+4jy00gieCV2LFlMlgt9f5xAOv4OdP0QthrynxuPMWo6cWmr9n1Eu4lDawp7zNjejfK1MQWgYw5mHfw3ifZHmUOiMjTzr3eoNlMSdVocRsAnaP3okSNfBhJcKLkgUM8ll6PJDhh064lEq3m9Hw2pXsvNlNuOftI6P2YpB6+EsAVZNqDvJeYA9QWhL0E/w4OzrN8zzSAH1NCXc3XdbTvuhsCKzUkEb4ZNPYNW3rnabL4IOWFBVfGORgM5LMNmFILRkSjnHVs4FW939dzdtrH9cQmvu88GXyEID5ADBzke9ZzHSAB0Pl38GLuKEsqGmMHD/Mx4enRTlr9xyl5U/YG7hqCtESJEnmeFJMrB9lm5i8f44Dv6Fm7GwAtmJ8D0ej/tuK/DM5/PMzn93sLuU5jpUazkD33uOddKXuySSk1RilJeiixSuiSUHk3aOiIetIWfBXMD6yAnbvB8y4chovEYYGB0KmDu0ZtnN4YMOe1wWE+huAioiV0Sd5Ht7jtlFPrlXRJVVKPK5CEhS0oUi6gNm4XqBvtrFnFmekQZUaNGvo8uiiRKe7gTvM7oMRF3hNc1U8i8a3agvEwX4cuBfJirD3oDWZfZo2iub88ADqjztEG4Izh3FFTZKLYY+7J1OtXklnb+Lkn5qfvGu3ciYC2AMoQHydSU6t6nTPudVKEFZobnGobyyGZ5CxmC8KuyomPOgjMlou8HfOTdRqt/GMkZQUihI2l1jZlsvR+JGF+beF9AdDLAOYyXDTrEJy/tLRIJ2gAcsN2Mb0824Juts3E0ilt2QmAtk2p13DRdwYL7xQJ1jpRLPb/OuXdDnRInkenAHonFzWjAcyZLyZPks23owM24BYZ0LYI3EHPxTHM33USLDtQH+TPLSh4qmlUYDDPwaU1xtTNAcz5WcyFpKXoFpapo4KCuQqXyjmCxWvBBcuOrQ8g2Z9ZD4BuveFKcGHsQ+ji/W8dZiVKv+PU04XculU0QBs7b4NzzZ0N7FwoorEiNhUk28AkALo5mCtwaY1lOBdd0M3FBPUh6mmrVxIA3cCsKOFGNpgEMBd2wV6D2yy8tWh9FBWskbZSakxh5SYTdQJLW5GeObjdP4XxekQFAbN5NfpQXH+z1bDQDL8v6++8WFAfgfNE9RXF61EkybGJulkL1nHmZemFS44qe88vx7VataeS950x5hc2Lwp25uD2Im5GQbxReacO2kLQCsBMoDihbdunOMjrOsYOHOb19sLt9qi1iRiMkYeQJN6P8zpGvDYqSm63sfQJANfBbaSYzJsk4wI0SomeDSsjUAQw2w6P0wD+DsB/suMqfH4HgNsBPI8AP3eJILMFcRnAfwP4DIAf8vvtfJfdAH6TP88WSC4q22YjXP28XPcniqp+J2d2vhxJxc8isLMVSHwMwJ0icqDpaFS9GsCbAPwckh0gS/m+foL3bSJy7wLf1wvgzwC8CC7rsFQQUFcBXMtZ7FwOg81KBj+W5yg3dl6LZPdJ3mD2C9K8zsCsqhtU9QZVvU5Vh/iciMh+AHcA+DfMLx92MWDu4/2/UkTuVdXYPl9Vr1LVXaq6HQBEZFZE/gLAl1A8H/ApyqJcI4hxjqO6AlepZw5JGYIisPMggHeJyGFVHQZwJ4DneAA6qapfBvAhAlEA3MUpd/dF6EhLtq9wJtivquKwrC8C8AJKm14Ac6r6EK/rIQB3A7gRyfEYkjMJxCSBDXlr6TwZOuJi5xSKEUQxdj4F4H5VLQH4awCvpgSxErUb+dwnVfV2EamKSAXAW3FhzefFBs9qAB8UkYf53BUA7uH3Pt3zJAiAWwB8QFW3i8gRAN/B/PLARVhE+7UDZSUB2urRAUm+RhGsBOCciByHOxXr2dSFdU8iWTmxYQDvUdWXUw7sAfDxFqWA6eYfAfgIJcbTAHwYwE38/KnUAmuM640XqmqEpOJREcwPtvQhR790HoC2rT1rOU0VyWoA1qjqKiSbbK0QohUen+YCZI4LoDer6ov5/g/BhYQXCwzZIuaDIjLFxeUH6O2ZQFIzY4ws7Pu8+0WkjgL5flMy0s6tyeXa8gB0HUl514kM3DxWhLHZw4/EVeCSbn5DRB4E8DW4cPwmuLTJuzH/SAubYd6kqjeLyCkA/0wdXl/geoYAPAjgSxw87ySYrYqRVTr6NBecW3gNZwHco6pXkcknceGJsovd63KydITk3JpcZv84h1FslfanyXLLvRhcvYAHxUBQZYdXOcjuUNXH6MF4MT/jswBey2s3l5l4n/FWLub+he9Zg8anTpl0+ZCIVFT1LdTLY5h/Au0snJ/7twH8D9zJBJ/g/9/Le5pFUgvbjneLmoDJGHRyGZnTTkSwANGl+ucvHmAZ+6GtUZ8CFwmbWOYbVrq4JjzA2pFq/WTBNUi2Fq3m/+yaPg/gP/j3rwJ4JhoHNap8/6dF5C5VvRPA63BhuQXTzvsA/AqA2yg1GrWD+cOPU8ocArALwK9TS1tC0BTfP87vO02mn0ZycJLVJ9nKe1iu492sfzfxOw9n5L160g+dNUOb3zXOYPQaeKoicveCraFahovGbYLbYf5UAM8A8FwALyd4DDDlJjPdBIDnq+qnAHwMwMs8+eBXAu0j05YA/Cma18eICNY1AP4SyWFGhymFfsxF5QGC/qyIVBe4xxKADy6zFDDZcQZux1HmUcM4Y3Y2uTGD5MSq5bphO7btZfQK/Lm3WPPPK1SC/hRddv9HAESc5m+mt2M3Wfgc2b7UZBC9XkReqqpfhwuPn/E61tyCn4OL9u3kTBU3WaBaLskoZ4ovAfiuiDzeALBC0PplhMXr5w/Q9Te+zKAusd3Np5+p7MjDXTbEaTurRe8Jato9IvJhsnHarRapKlJgqDFSeADAR1V1N0H4HHaUSQ9/kXgewI2q+hMAPkWG98E+DOA+DuhXoHGikTH6ZdTVnwDwGboFfbaNUoOyUbWoSESqqvpGgnk0oz63U8hWsZ0yizNkuRI1hrJTW7OajkqUA29Q1esZBIkaXJumvARQ1VhVy6paEpHvicgbKSW+TL1dauI5eBmA/8WFud0RgH+njrUafZJiZdP3nwTwYhF5h4js8a8FSfpq2kuDBmC+HcBLUovO5e5nOwJ6MGvXXZaANk1rh/Jk9d1+bby7mCuhF3HNNYdtBygReVhEfpcSxo4rrnntOQngVi7ovo0kmmdy44dwYe1qAzCvIov+noi8meH3Mq/5yWtp8Z7rqjoC4I85cLLsa9shHiHjkgdZgso01QyyD3NbQfSbADxPRGpL0HV1ADUCOxaRTwJ4JRdkdvahv9H3p7l4i73B/AN+703scPHAvBrA9wG8VES+4rHxUvzHEYMvr+TibDpjprR2qHoDWroJ0Gb9qY7MGtQzAF6hqn1YeiSrTvbrYQ7Gq+AO6fE7rkaX3MPe/fYAeADA9UiOXbPXDvN/d4jIMU/n6xLBVFXVTXQ1Zu4L9mya7ZIZgWUFaAsm2KmseaSKCr/7WgC3kcEu5f6rlCBHAPw+NWPZ68gbOYCOUhdX6Wa71bt38zXvB/AHIjLZZNF6seyslDX+wEFO7d3XjRraFoSt1iVe7mv5JQ9Ql2I1MvVeAH/ldd4sXObcVrhzwgfoLjsH4Gc8CWDnnbxRRCbaAGZj5z66DKdzamvzR9sZ5Zn5o7MCdN1jqTwTaixYsVtVt1BLX+q1GFN/EcC9lA9VSoybyL6DcDukN8DlOM+yg4fhQuAPtQHMACBk5138nqwXg+nBZamv5W4CtPkgezn95Zn3bMGdEUqCdrWB3dP7OWBMWt3iaehjBHi/5557HMA/MYhTb9P9AW5LWE8B2rrm3WvX+aEN0EWxn2rnDETPx6P0bKwikK8mU04Q5LcgOR9mAMDnRWSijVNyjbteduWondMD3WarTDwdWfsmZ5H/7hRzKV1DZmzXvjwhmO7z7rFEtpyEy6jbwjYwP+39tu2qHd/Phe4IXLHLohRSnCOgu2pRaG6rImzqNEBvBLCGIGhHxyv168Nw+Rvmfx5iOw95QO+hBDmQkiztkBub4RKailKeq4oM3YZZANpCoXWO1qgAgLao3IYUGNqho8cwPx20lvKoPHl2iYhYNK3dgC5CQXL/jPEYXRZYKaFYVd/N67KmrT3o5MMsEl97s8FiiUxYho5eh+IVuix3I0MX6dxA07fD7QQVJUeEJHdZF2iPoTbKDd+GUax9hnOe/NFuALTdWN4+6EbX1NtegtYSO/AbnGbTiVCmn6sAvr5MDN1bIOIQz7uRSb/HGd+YolhHGLR7QJs+/lsA98OFuZ8L53u2Xdyfg8vC28cBUC/4PbVrNuw6QEsBG7qdfnERkRpdge/jonOQYDa5NQLg+QB+GW4L1Z1of15LBcWzqNskR9HMGneqzZIjFpEZuF0a1xLQaclxGdwm4eOe5m6nTRWUPLpmUQgUrwq9afozbW5wA9JXkewyT5vVeP7qMnX2BIp3hmBmDoEsGToq0IxgmWDj7R64dN19AS5Poy/Vkeb//h6Aby+Thj5VwMV3tdsAbemjRSmZWyI7j6VY0lI6S0iKtghcFLBuj8UWhSJyGsB7ML+Ckl8b710sOSCLiPL0dza6vvS0fhzz/eBFaOvMZEec0QjVAnk4bHAdA3COiziBS4yvNBHHkar2s3MqcK65Zlajlv68qt4Atw1qlAC7DMBbROR73j7BhUS5nelSATDTaDBxRohTgD4NF2DJO0HJvD4x5scjOt7LUUMxwt5+I+/j32URmSU4+riYuw5Jptw6Mt4BuD2BD8AVe1l0gQjg7XB1SJ7DznyfiHykxdxngUsyugnADQC2UaKcgMux3g/gEQB7bSCqag/cJoIjKM5JrxZc6TqGtvD3NIoRmv0RvQyzqnotXGmuW+B2mViN4+8C+CJcEOQAPRhWhGaxQRNRqrxeVb/A97+bx0q0kqSlIvIIgEd4asA1cPsUb4fbcVOFK6l7WFX/C8C/ishRXt8jcFl+eWc1WiAps6S0OENWnCsIkK2yz7dY+fOPCBBLvC/B1c64R0S+naLdVvWgeKy5Cy73eYOq7vCOuVg0B9q+T0TOw1UrfVBV3wvgWZQyP0mgPx3AS1T1Y3A+8G8C+K2CLArjbgS0yY7erLRUMy8EXA7FA7yWj1NejHoLxXeJyOc8QNlCtlXXowVYdhF0t/H5dQA+pqr3crAcbAHU6s0IpvWrInKfqn4F7lSs1yKp4voGuOT+d1AWbSiA7DAZlM20kEH1Uf88lUEAB5HfeSq2y/o+MttT6OYaAfAogDeIyGN2cA+WVg+jqqrPBvA3SIpS+l6lVfSuvAouWrgU110JrlRZXVVvgqsvvRoug+9yAN+Cy/q7Gfmdd2Luup3U/eeX8ToyPQXLz4st58wWVsDxVmrlcXoe9gB4NcFsaa71JXYiyJJ9/HzxHsrZYD2Ap1DDL6U9aiSjHhF5AK6O9TkkhR1voAzJ032nnnsxs1kiyhBItvXoYkpxLRdzWCP3wYWp/1BExuh9qF5SLzp58F3ebyNJ10ugP8TX6iUApkpQPwrgT5D4qI088jQ7TFSzdB9mmT46500NRdhNoZQf76aebcdq3IIgUwtpYt7/eb72Uge3gfqbAD4Klw9dRzE8HP3IOG0469p2c0iyzyRn9hiAqwX9WS7Oqm343AEeIHR3k2nW2qEPwN+r6i+2SYZZlt8/Uq/mXcIAHqCns9aUWdo0LsxAy6uxewF8liHodrXDLBdkDy4AKgvsfA0uUFNrQ3sogJKIjHLBO1iAWVCQQy3DLHM5rNRsH/KPGNoREl9PSYFLtZqIHEJSIHEhQJ/geYhtG9wMg38ZxQh522FGmdYyzDrbzmqt9ebIILZYOQTgKEHQjmuJ6H++E67A+Fk0DiRZad+7VPUFbZwh6vSa7EFS3DyvmbCG5HzFTFMesgS0+SVn4YIbeaU4Gns8vsQ60c3AXFXVrXCHDJ1d5N6sotBrmIDUjrZQ6uhxuJB4Xr5+WxDamd+ZXkMeU/85JMci52URklNs2zmohjB/Y+hig7sMoIfM2hYwcZCeQX5pBiYvB9jXmaYMZ33Gik23vTkyiFmlzfcGuKT+U2j9aOQjAM62kteR470tRdLZpuDMo5RZM7QFWCpk6TxLg7W7hEHMJKJ9LQK6DODhZdpXmFcpA5udLiOYM5eVcU5gOgNXtWgc+SQq1eDyNxbzcPhh64WY2WafKpLj3rSFwT3hLRR9mbLQ99UXAhPzUFbntOi2wTkE4Al0+cGbfsefgctnsCLoWR9oUwWwyTuUp1m5rjo1aUuDRFXXwdWdXiyHQuD2NP6Cqt5jedYtTgX+GeNpAa2qugYusy+PYo2WzQgkZzB2NaANKHNIjv09nrGetuy/LQA28JCeNKOa16KkqjfDJfqsZwedh0sAOg4XlbOd4zvhzve+vAVA20kCuwC8X1X/gYwWc7reyM9Zx8XVHNyWse+LyA8I7PQWLgPvNrbrTA5EYeV8z/D3zBemeQDapqUxgupkxqPYGHoNgOtV9Tivp5YC841wCT9PQ+NEH/OxWmh3mM+1muFmgaZbAPwsksNI+6jBG33GjKo+AODtIrI/BWoD725+xlTGgDL//gAHX+bsnKeGNqarU+9NINtAgEmfW0Xkfh6L7IP5WXD5zH6V0Gb62sB+fgkLbQO11c8Gkuqlzb7zVrhjLO4QkR97oLYSCrcg+0ihkcQGDqTZvLxYeYegxzitag73PQXgFm7DsqLcNVW9AsDbyLYWwm70iLxp1o6Ii5Z4Lenafwt952nOLu9QVcvZKFHr7wDwDCSnuGa9NloD57bMrVxF3snfp8nMWbvwrI7zNgA/b64z/nwN3E7tmRZnsHbV7Wv1M8r0pFwP4EVMQTVp8VxP+mTNzmspwSaR497RPBnaWGmUC6DMjs9NdcSvWRlcVd0M4Nlk5hjFtZgs/AKGzudUdRjA83Ji54iAPoGciwnlCWgLLozxp53vl+W9T8Kdyf1MsvNt7Jgqim3m9tsOYDdZ+oWccbI82NRIwYra5HkMcyE0tAH7JIBNFzn1tnN1/lrPQ6DoDFN6M65ngZxX5Kid19OzkXupt6gAnRIjKZo4gmwDAsbSu1T1pRxUVXROmeEanP/7d+AqJWXNzhW22WTe2vnJi8qgjEErDWP5s9vgyltJDtdQxfyNnZ1gJj16cmgzk4w74XKw89whk2kZg1anrfN8bEb2flSbKToJzL7syIMAagCugHPTFeWQz8JMrQaoo3CBljwy8bTDwOxfd9ZgriA5Pi7PzQSFBbQ/6o8CuLJDwbUSzGTZRrhyY1KkvioSoP0F4hSnsyIcwB7sQtK5Ci5+kHW+SEcB2l9oHKHsKNKZ1QHMTiubezXrLMmOBLQP7INk6TKKdwjOSgRzFS74tQ7AY8gpm65TAV2C82seh6ukHwCdv26OKTUOocC++iIzdJkr6Cm4EG/Q0/n2x072x1nkX3Cz4wBtjdjDlXQMV/52LoA6c6lRIaFMwSUflVFgD1TUAcxQgttJvRrOVRRAne0i8Cri5FDRwdwJgPYbdy/cjogNAdSZgXkrXCRyX5FlRicC2vb8PUqWXhdAvexg3gLnOt3bQTjpmAv1617sgcv3CEy9vMw8TDBLJ7Vx1EGNbaCueEwdNHV7zTTzEImj0zDSWRebYupH4HaXWIg82NJZWSnprobzLO2Bd855AHQ2oK4T1P1Igi9Z70vsBjBbkOQ6gnovCpaf0e2ANlALr38vGfo6JAe9B1C3BuYK3PEV18ElhR1CsTcHdy2gfSuzI07CHaY5Qi2IAOwFJUaFa5DtbD9LNupoi7uggyyiaOmMV3GFfhhJSmrIrZ4vMcpwRWmEsq2Kztut07UMbaAuw+2ve4R/PxXOjxrYej4rj3AmO49kL2DXDPq4izrNLxx+EK6K51a4nOon2Jll77UrCch2PuR29vkBzmYWyu6a9oi7tCN74LLCbNPtNXCbOU95960rAMjmwdjCgT0Gl2Ak6IC8jADo+WxtoD0CVyJhMzv1JOZXzpcu6lgfyAKXIrAOrprpXiRngGu3DuhuBbQvK0xb76MMsULip5AUK+90YPsauQQXcFoL51c+gqRWXxldLre6GdBpbW1HYdj5Lpa5N8bnDAxRh+hsA7EFlMocrGt4L8eQnPfS082svNIAnZYhgCvjexrJHrl11NunOT1rQcEtHjBNHw/QczHAmehx3kvU7fJipQPaB6bd91mys4HiCk7TZ/mY9RjechuyBLj/fX5ov5+DcRX/PkfPzsxKBfJKBXQa2KadZ8lsVnx9NZLCkZMEzAySJCjxAC5NPvtiQeu/3wBsIf4YLgNuFQefnUBwAsnRHqWVDOSVDug0gHw31gSlRxkuz2EVXC2KiICeRnKOSIWMrilwtpJD7APPf3+JmrePTNzPfqp7ILZDLSNvfbCigRwAvThrK+XIBEHTS3YcQHLEG8jiFf6cJdBq/FsXYOUeD4w9HECx1ydVzgpWSWouJX/KDQYEAqCDtQruOQJszJMBZSTnlvfxuT5PMpRxYSpmFfPrWphON9DOpZjf5E2curYA4gDoSwK3pNpLkRzBpg00sa+xpYk+RoP3RqnvCgAOgF52cCOleWWB1zbSttEi7wkADoAuFNCX6z3BFrEoNEGwAOhgwQKggwULgA4WLAA6WAB0sGAB0MGCBUAHCxYAHSxYAHSwAOhgwQKggwULgA4WLAA6WLAA6GAB0MGCBUAHCxYAHSxYAHSwYAHQwVaEhfNHgnWDPbmz3q/UEyxYJwM6BhDFcKWmggXrdED3ADjz/28N4gfwoocIAAAAAElFTkSuQmCC" alt="Clínica Hope">
+  <h1>Clínica Hope</h1>
+  <p class="subtitle">Instale o app para acesso rápido direto da tela inicial</p>
+
+  <!-- Android Chrome: botão nativo -->
+  <div id="card-install" style="display:none;">
+    <button class="btn-install" id="btn-install">📥 Instalar App</button>
+  </div>
+
+  <!-- Android: instruções manuais (fallback) -->
+  <div id="card-manual-android" style="display:none;">
+    <div class="install-card">
+      <h3>📲 Instalar como App</h3>
+      <div class="install-steps">
+        <div><span class="step-num">1</span> Toque nos <b>3 pontinhos ⋮</b> do Chrome</div>
+        <div><span class="step-num">2</span> Toque em <b>"Instalar app"</b> ou <b>"Adicionar à tela inicial"</b></div>
+        <div><span class="step-num">3</span> Confirme tocando em <b>"Instalar"</b> ✅</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- iOS: instruções Safari -->
+  <div id="card-ios" style="display:none;">
+    <div class="install-card">
+      <h3>📲 Adicionar à Tela Inicial</h3>
+      <div class="install-steps">
+        <div><span class="step-num">1</span> Toque em <b>Compartilhar</b> ⬆️</div>
+        <div><span class="step-num">2</span> Role e toque <b>"Tela de Início"</b> ➕</div>
+        <div><span class="step-num">3</span> Toque em <b>"Adicionar"</b> ✅</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fallback -->
+  <div id="card-fallback" style="display:none;">
+    <div class="install-card">
+      <h3>💡 Dica</h3>
+      <p id="fallback-msg" style="font-size:0.95rem; opacity:0.9; line-height:1.5;">
+        Para instalar, abra no <b>Chrome</b> (Android) ou <b>Safari</b> (iPhone).
+      </p>
+    </div>
+  </div>
+
+  <button class="btn-skip" onclick="closeSplash()">Continuar no navegador →</button>
+</div>
+
+<script>
+// ======= CARREGAR URL DO PSICÓLOGO =======
+// Cada psicólogo tem seu próprio deploy ID do Google Apps Script
+// Link: https://seusite.github.io/Hope-App/?id=DEPLOY_ID
+//
+// O ID é salvo no celular, então ao abrir o app instalado
+// ele lembra qual psicólogo é — sem precisar do ?id= de novo.
+var params = new URLSearchParams(window.location.search);
+var deployId = params.get('id');
+
+// Se veio ?id= na URL, salva para próximas aberturas
+if (deployId) {
+  try { localStorage.setItem('hope_deploy_id', deployId); } catch(e) {}
+}
+
+// Se não veio na URL, tenta recuperar o salvo
+if (!deployId) {
+  try { deployId = localStorage.getItem('hope_deploy_id'); } catch(e) {}
+}
+
+if (deployId) {
+  var gasUrl = 'https://script.google.com/macros/s/' + deployId + '/exec';
+  document.getElementById('app-frame').src = gasUrl;
+} else {
+  // Nenhum ID encontrado — mostra erro amigável
+  document.getElementById('loading').innerHTML = 
+    '<div style="text-align:center; padding:24px; color:white;">' +
+    '<h2 style="margin-bottom:12px;">⚠️ Link incompleto</h2>' +
+    '<p style="opacity:0.8; line-height:1.6;">Este link precisa do ID do sistema.<br><br>' +
+    'Peça o link correto ao administrador.</p></div>';
+}
+
+// ======= PWA: Service Worker =======
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(function(){});
+}
+
+// ======= INSTALL PROMPT =======
+var deferredPrompt = null;
+var isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+                   window.navigator.standalone === true;
+
+// Se já está instalado, pula splash direto
+if (isStandalone) {
+  document.getElementById('splash').style.display = 'none';
+} else {
+  detectPlatform();
+}
+
+// Captura o evento de instalação nativo do Chrome
+window.addEventListener('beforeinstallprompt', function(e) {
+  e.preventDefault();
+  deferredPrompt = e;
+
+  // Mostra o botão de instalar nativo (esconde instruções manuais)
+  document.getElementById('card-install').style.display = 'block';
+  document.getElementById('card-manual-android').style.display = 'none';
+});
+
+// Botão de instalar
+document.getElementById('btn-install').addEventListener('click', function() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(function(result) {
+      if (result.outcome === 'accepted') {
+        closeSplash();
+      }
+      deferredPrompt = null;
+    });
+  }
+});
+
+// Detecta quando o app é instalado
+window.addEventListener('appinstalled', function() {
+  closeSplash();
+});
+
+// Detecta plataforma
+function detectPlatform() {
+  var ua = navigator.userAgent || '';
+  var isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+  var isSafari = /^((?!chrome|android|crios|fxios).)*safari/i.test(ua);
+  var isChrome = /chrome/i.test(ua) && !/edge|edg/i.test(ua);
+  var isAndroid = /android/i.test(ua);
+
+  if (isIOS && isSafari) {
+    document.getElementById('card-ios').style.display = 'block';
+  } else if (isIOS && !isSafari) {
+    document.getElementById('card-fallback').style.display = 'block';
+    document.getElementById('fallback-msg').innerHTML = 'Para instalar no iPhone, abra este link no <b>Safari</b>.';
+  } else if (isAndroid && isChrome) {
+    // Mostra instruções manuais primeiro; se beforeinstallprompt disparar, troca pro botão
+    document.getElementById('card-manual-android').style.display = 'block';
+  } else if (isAndroid && !isChrome) {
+    document.getElementById('card-fallback').style.display = 'block';
+    document.getElementById('fallback-msg').innerHTML = 'Para instalar, abra no <b>Google Chrome</b>.';
+  } else if (isChrome || /edg/i.test(ua)) {
+    // Desktop Chrome/Edge - mostra instruções manuais (beforeinstallprompt vai trocar se disponível)
+    document.getElementById('card-manual-android').style.display = 'block';
+  } else {
+    document.getElementById('card-fallback').style.display = 'block';
+  }
+}
+
+function closeSplash() {
+  var s = document.getElementById('splash');
+  s.classList.add('hidden');
+  setTimeout(function() { s.style.display = 'none'; }, 600);
+}
+</script>
+</body>
+</html>
