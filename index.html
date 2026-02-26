@@ -16,8 +16,10 @@
 
     /* ======= IFRAME DO SISTEMA ======= */
     #app-frame {
-      position:fixed; top:0; left:0; width:100%; height:100%;
+      position:fixed; top:0; left:0;
+      width:100vw; height:100vh; height:100dvh;
       border:none; z-index:1;
+      overflow:auto; -webkit-overflow-scrolling:touch;
     }
 
     /* ======= SPLASH / INSTALAÇÃO ======= */
@@ -94,7 +96,7 @@
 </div>
 
 <!-- Iframe do sistema GAS -->
-<iframe id="app-frame" src="about:blank" onload="if(this.src!=='about:blank')document.getElementById('loading').classList.add('hidden')"></iframe>
+<iframe id="app-frame" src="about:blank" allow="geolocation; camera; microphone" scrolling="yes" onload="if(this.src!=='about:blank'){document.getElementById('loading').classList.add('hidden');resizeFrame();}"></iframe>
 
 <!-- Splash de instalação -->
 <div id="splash">
@@ -180,6 +182,21 @@ if (deployId) {
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(function(){});
 }
+
+// ======= FORÇAR DIMENSÕES MOBILE NO IFRAME =======
+function resizeFrame() {
+  var f = document.getElementById('app-frame');
+  if (f) {
+    // Define dimensões em pixels reais para forçar viewport mobile
+    f.style.width = window.innerWidth + 'px';
+    f.style.height = window.innerHeight + 'px';
+  }
+}
+window.addEventListener('resize', resizeFrame);
+window.addEventListener('orientationchange', function() {
+  setTimeout(resizeFrame, 200);
+});
+resizeFrame();
 
 // ======= INSTALL PROMPT =======
 var deferredPrompt = null;
