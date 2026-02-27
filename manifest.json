@@ -1,12 +1,13 @@
 {
-  "name": "Clínica Hope",
-  "short_name": "Hope",
-  "description": "Sistema de Gestão - Clínica Hope",
-  "start_url": "./",
+  "name": "Hope Clínica - Gestão de Guias",
+  "short_name": "Hope Guias",
+  "description": "Sistema de Gestão de Guias - Hope Clínica",
+  "start_url": "./index.html",
   "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#004d40",
-  "theme_color": "#004d40",
+  "background_color": "#1e3a8a",
+  "theme_color": "#1e3a8a",
+  "orientation": "any",
+  "scope": "./",
   "icons": [
     {
       "src": "icon-192.png",
