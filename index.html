@@ -1,270 +1,1209 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#1e3a8a">
-    <title>Hope - Gestão de Guias</title>
-    <link rel="manifest" href="manifest.json">
-    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-    <link rel="apple-touch-icon" href="icon-192.png">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        html, body {
-            width: 100%;
-            height: 100%;
-            height: 100dvh;
-            overflow: hidden;
-            background: #1e3a8a;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            position: fixed;
-            top: 0;
-            left: 0;
-        }
+  <meta charset="UTF-8">
+  <title>Clínica Hope</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  
+  <!-- ==========================================
+       PWA META TAGS — Fazem o app "instalável"
+       ========================================== -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Clínica Hope">
+  <meta name="application-name" content="Clínica Hope">
+  <meta name="theme-color" content="#004d40">
+  <meta name="msapplication-navbutton-color" content="#004d40">
+  <meta name="msapplication-TileColor" content="#004d40">
+  
+  <!-- Ícones PWA (gerados inline via SVG data URI) -->
+  <link rel="icon" type="image/png" href="data:image/png;base64,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">
+  <link rel="apple-touch-icon" href="data:image/png;base64,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">
 
-        #appContainer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            height: 100dvh;
-            overflow: auto;
-            -webkit-overflow-scrolling: touch;
-        }
+  <!-- PWA Manifest inline (funciona em GAS) -->
+  <link rel="manifest" href="data:application/json,%7B%22name%22%3A%22Cl%C3%ADnica%20Hope%22%2C%22short_name%22%3A%22Hope%22%2C%22description%22%3A%22Sistema%20da%20Cl%C3%ADnica%20Hope%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23eef2f6%22%2C%22theme_color%22%3A%22%23004d40%22%2C%22orientation%22%3A%22any%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%2520viewBox%3D'0%25200%2520192%2520192'%253E%253Crect%2520width%3D'192'%2520height%3D'192'%2520rx%3D'40'%2520fill%3D'%2523004d40'%2F%253E%253Ctext%2520x%3D'96'%2520y%3D'125'%2520font-size%3D'100'%2520text-anchor%3D'middle'%2520fill%3D'white'%253E%25F0%259F%258F%25A5%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fpng%22%7D%5D%7D">
+  
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+  <style>
+    /* =========================================
+       CSS VARIABLES (Design System)
+       ========================================= */
+    :root {
+      --primary: #004d40;
+      --primary-light: #00695c;
+      --primary-surface: #e0f2f1;
+      --danger: #d32f2f;
+      --danger-light: #ffebee;
+      --warning: #f57c00;
+      --warning-light: #fff3e0;
+      --success: #2e7d32;
+      --success-light: #e8f5e9;
+      --surface: #ffffff;
+      --background: #eef2f6;
+      --text: #333333;
+      --text-muted: #666666;
+      --border: #e0e0e0;
+      --shadow: 0 2px 10px rgba(0,0,0,0.05);
+      --radius: 14px;
+      --radius-sm: 8px;
+      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      
+      /* Safe areas para notch/barra de status */
+      --sat: env(safe-area-inset-top, 0px);
+      --sab: env(safe-area-inset-bottom, 0px);
+    }
 
-        #appFrame {
-            display: block;
-            border: none;
-            background: #f0f4f8;
-        }
+    /* =========================================
+       RESET & BASE
+       ========================================= */
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    
+    body, html {
+      margin: 0; padding: 0;
+      width: 100%; height: 100%;
+      font-size: 16px;
+      font-family: var(--font);
+      background: var(--background);
+      -webkit-font-smoothing: antialiased;
+      overscroll-behavior: none;
+    }
 
-        #loadingScreen {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #2563eb 100%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            transition: opacity 0.6s ease;
-        }
+    /* =========================================
+       LAYOUT PRINCIPAL
+       ========================================= */
+    .app-container {
+      width: 100%;
+      min-height: 100vh;
+      min-height: 100dvh; /* Dynamic viewport height (melhor no mobile) */
+      display: flex;
+      flex-direction: column;
+      padding-top: var(--sat);
+      padding-bottom: var(--sab);
+    }
 
-        #loadingScreen.hide {
-            opacity: 0;
-            pointer-events: none;
-        }
+    .custom-header {
+      width: 100%;
+      background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
+      padding: 16px 15px;
+      text-align: center;
+      color: white;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+      flex-shrink: 0;
+      z-index: 10;
+      position: sticky;
+      top: 0;
+    }
+    
+    .header-content { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
+    .header-content h1 { margin: 0; font-size: 1.4rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+    .header-badge { background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; backdrop-filter: blur(4px); }
+    
+    /* Indicador de status online/offline */
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #4caf50;
+      display: inline-block;
+      margin-right: 4px;
+      animation: pulse-dot 2s infinite;
+    }
+    .status-dot.offline { background: #ff5722; animation: none; }
+    @keyframes pulse-dot { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
 
-        .loading-logo {
-            width: 100px;
-            height: 100px;
-            margin-bottom: 24px;
-            animation: pulse 1.5s ease-in-out infinite;
-            border-radius: 24px;
-        }
+    #content-area {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 15px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
 
-        .loading-text {
-            color: white;
-            font-size: 1.5rem;
-            font-weight: 700;
-            letter-spacing: 3px;
-            margin-bottom: 8px;
-        }
+    /* =========================================
+       MENU & CONTAINERS
+       ========================================= */
+    .menu-container, .form-box {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      width: 100%;
+      margin-bottom: 20px;
+    }
 
-        .loading-sub {
-            color: rgba(255,255,255,0.6);
-            font-size: 0.85rem;
-            margin-bottom: 30px;
-        }
+    .menu-header { text-align: center; margin-bottom: 20px; }
+    .menu-header h3 { font-size: 1.6rem; margin: 0 0 5px 0; color: var(--text); }
+    
+    .grid-expansivo {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+      width: 100%;
+      align-items: start;
+    }
 
-        .loading-bar {
-            width: 200px;
-            height: 4px;
-            background: rgba(255,255,255,0.15);
-            border-radius: 4px;
-            overflow: hidden;
-        }
+    .menu-item {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      text-align: center;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 130px;
+      transition: transform 0.15s, border-color 0.15s;
+    }
+    .menu-item:hover { border-color: var(--primary-light); }
+    .menu-item:active { transform: scale(0.97); background: #f5f5f5; }
+    .icon-wrapper { font-size: 36px; margin-bottom: 8px; }
+    .menu-item h5 { margin: 0; font-size: 1rem; color: var(--text); font-weight: 700; }
 
-        .loading-bar-fill {
-            width: 30%;
-            height: 100%;
-            background: #4ade80;
-            border-radius: 4px;
-            animation: loadBar 1.5s ease-in-out infinite;
-        }
+    /* =========================================
+       FORMULÁRIOS
+       ========================================= */
+    .form-control {
+      width: 100%; padding: 13px; border: 2px solid #ddd;
+      border-radius: 10px; margin-bottom: 14px; font-size: 1rem;
+      background: var(--surface); transition: border-color 0.2s;
+      appearance: none; -webkit-appearance: none;
+    }
+    .form-control:focus { outline: none; border-color: var(--primary-light); }
+    
+    select.form-control {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M6 8L1 3h10z' fill='%23666'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 32px;
+    }
+    
+    label { font-size: 0.95rem; font-weight: 700; margin-bottom: 6px; display: block; color: #444; }
+    
+    .btn-submit {
+      width: 100%; padding: 16px; background: var(--primary-light);
+      color: white; border: none; border-radius: 12px;
+      font-weight: 800; font-size: 1.05rem; margin-top: 10px;
+      cursor: pointer; transition: opacity 0.2s;
+    }
+    .btn-submit:active { opacity: 0.85; }
+    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+    
+    .btn-voltar {
+      width: 100%; padding: 14px; background: #f0f2f5;
+      color: var(--text); border: 1px solid #ddd;
+      border-radius: 12px; font-weight: 700; font-size: 1rem;
+      margin-top: 10px; cursor: pointer; text-align: center;
+    }
+    
+    .doc-type-selector { display: flex; gap: 10px; margin-bottom: 18px; }
+    .doc-option {
+      flex: 1; padding: 14px; border: 2px solid var(--border);
+      border-radius: 12px; text-align: center; font-weight: 700;
+      font-size: 1rem; color: var(--text-muted); cursor: pointer;
+      transition: all 0.2s;
+    }
+    .doc-option.active { border-color: var(--primary); background: var(--primary-surface); color: var(--primary); }
 
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.05); opacity: 0.85; }
-        }
+    .view-section { display: none; width: 100%; }
+    .view-section.active { display: flex; justify-content: center; }
+    
+    /* =========================================
+       AGENDA
+       ========================================= */
+    .day-column {
+      width: 100%; background: var(--surface);
+      padding: 10px; margin-bottom: 16px;
+      border-radius: 12px; border: 1px solid var(--border);
+    }
+    .day-column h4 {
+      margin: 5px 0 12px 0; color: var(--primary);
+      font-size: 1rem; text-transform: uppercase;
+      border-bottom: 2px solid #eee; padding-bottom: 8px;
+    }
 
-        @keyframes loadBar {
-            0% { width: 10%; margin-left: 0; }
-            50% { width: 50%; margin-left: 25%; }
-            100% { width: 10%; margin-left: 90%; }
-        }
+    .appointment-card {
+      padding: 10px 12px; border-radius: var(--radius-sm);
+      margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      background-color: #e3f2fd; border-left: 4px solid #1565c0;
+      color: #0d47a1; font-size: 0.92rem;
+    }
+    .unimed-amarelo {
+      background-color: #fff9c4 !important;
+      border-left-color: #fbc02d !important;
+      color: var(--text) !important;
+    }
+    .appointment-card.free {
+      background-color: var(--success-light);
+      border-left: 4px solid #43a047;
+      color: #1b5e20; padding: 8px 12px;
+      min-height: 35px; display: flex;
+      align-items: center; justify-content: space-between;
+      cursor: pointer;
+    }
+    .appointment-card.free:active { opacity: 0.8; }
 
-        #installBanner {
-            display: none;
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(135deg, #1e3a8a, #2563eb);
-            color: white;
-            padding: 16px 20px;
-            border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.35);
-            z-index: 2000;
-            max-width: 400px;
-            width: 90%;
-            animation: slideUp 0.4s ease;
-        }
+    .card-actions { display: flex; gap: 5px; margin-left: 10px; min-width: 110px; }
+    .btn-card {
+      padding: 6px 10px; border-radius: 6px; border: none;
+      color: white; font-weight: 600; font-size: 0.78rem;
+      cursor: pointer; white-space: nowrap;
+    }
+    .btn-move { background: var(--warning); }
+    .btn-whats-card { background: #25D366; }
 
-        .install-content {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+    .niver-hoje, .niver-breve {
+      padding: 2px 6px; border-radius: 4px;
+      font-size: 0.72rem; font-weight: bold; display: inline-block;
+    }
+    .niver-hoje { background: #bbdefb; color: #0d47a1; }
+    .niver-breve { background: #e3f2fd; color: #1565c0; }
+    .idade-span { font-size: 0.82em; opacity: 0.8; margin-left: 4px; }
+    
+    .tag-inicio {
+      margin-top: 3px; background: #fff; color: #e65100;
+      border: 1px solid #ffe0b2; padding: 2px 6px;
+      border-radius: 4px; font-size: 0.78rem;
+      font-weight: bold; display: inline-block;
+    }
 
-        .install-icon { font-size: 36px; }
-        .install-text { flex: 1; }
-        .install-text strong { display: block; font-size: 0.95rem; margin-bottom: 2px; }
-        .install-text small { opacity: 0.7; font-size: 0.8rem; }
+    /* =========================================
+       MODAL WHATSAPP
+       ========================================= */
+    #modal-whats {
+      display: none; position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.85); z-index: 9999;
+      justify-content: center; align-items: flex-end;
+    }
+    #modal-whats .box {
+      background: white; padding: 28px 20px;
+      border-radius: 24px 24px 0 0; width: 100%;
+      max-width: 450px; text-align: center;
+      padding-bottom: calc(20px + var(--sab));
+    }
+    .btn-whats-opt {
+      width: 100%; padding: 16px; margin-bottom: 8px;
+      border: none; border-radius: 12px; color: white;
+      font-weight: 700; font-size: 1.05rem; cursor: pointer;
+    }
 
-        .btn-install {
-            background: #4ade80;
-            color: #1e3a8a;
-            border: none;
-            padding: 10px 18px;
-            border-radius: 10px;
-            font-weight: 800;
-            font-size: 0.85rem;
-            cursor: pointer;
-            white-space: nowrap;
-        }
-        .btn-install:hover { background: #22c55e; }
+    /* =========================================
+       BOTÃO EMERGÊNCIA
+       ========================================= */
+    #btn-emergencia {
+      position: fixed; bottom: 20px; right: 20px;
+      z-index: 10000; display: none;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    
+    #btn-emergencia button {
+      background: var(--danger); color: white; border: none;
+      padding: 12px 18px; border-radius: 50px; font-size: 14px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2); cursor: pointer;
+      font-weight: bold; display: flex; align-items: center; gap: 8px;
+    }
 
-        .btn-dismiss {
-            position: absolute;
-            top: 6px; right: 10px;
-            background: none;
-            border: none;
-            color: rgba(255,255,255,0.4);
-            font-size: 16px;
-            cursor: pointer;
-        }
+    /* =========================================
+       OFFLINE INDICATOR
+       ========================================= */
+    .offline-bar {
+      display: none; background: #ff5722; color: white;
+      text-align: center; padding: 6px; font-size: 0.82rem;
+      font-weight: 600; position: sticky; top: 0; z-index: 100;
+    }
+    .offline-bar.show { display: block; }
 
-        @keyframes slideUp {
-            from { transform: translateX(-50%) translateY(100px); opacity: 0; }
-            to { transform: translateX(-50%) translateY(0); opacity: 1; }
-        }
-    </style>
+    /* =========================================
+       RESPONSIVIDADE
+       ========================================= */
+    @media (max-width: 480px) {
+      .grid-expansivo { grid-template-columns: 1fr; }
+      .menu-item { min-height: 100px; padding: 14px; flex-direction: row; gap: 12px; }
+      .icon-wrapper { font-size: 28px; margin-bottom: 0; }
+      .card-actions { min-width: 90px; }
+      .btn-card { padding: 5px 8px; font-size: 0.72rem; }
+    }
+
+    @media (min-width: 768px) {
+      .custom-header { padding: 20px; }
+      .header-content h1 { font-size: 1.6rem; }
+    }
+  </style>
 </head>
 <body>
 
-    <div id="loadingScreen">
-        <img src="icon-192.png" class="loading-logo" alt="Hope">
-        <div class="loading-text">HOPE CLÍNICA</div>
-        <div class="loading-sub">Sistema de Gestão de Guias</div>
-        <div class="loading-bar">
-            <div class="loading-bar-fill"></div>
+<!-- Offline Indicator -->
+<div class="offline-bar" id="offline-bar">📵 Sem conexão — Reconecte para usar o sistema</div>
+
+<div class="app-container">
+  <div class="custom-header">
+    <div class="header-content">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACYAAAAmCAYAAACoPemuAAADwklEQVR42s2YT4scVRTFf7eqOj0zickkELMYRfAPgiK4cJNF3LhSBFdusnHjyqUfQf0C4sJFUPwAgxhcKIKIW3Uhgpu4kkhQ0BCdODP9p+q6OU8uz9fV1TMt9IOiu1+9W3Xuefeee1+bu3/LZg0Dpo2+bBowq9jQsS5gvinAPFwAZ9IWLFi38mhOAMiAkX7Xcm6quS3gT2AHaLWmA2arxnJzAkdcn2PNzQUuAUxgR8ChftdaNx8KsFmBqbG8rzV3LFZaAZkFRv/WuiYAGwn4dN2MWbja8AILTEQ25nLEBGxLdj6EtWYAU5WCexK87rKH2wJHXGtdDM9DwvlpstKAbT3QBSp63OnKR5y3YJtY3TqNXKS4mmoLSnKwC5wveF+aT7atHB33sVb1gErlKk/1NrDxMfC5GPAQT/vAF9r6NmPV5GwVEmmlGBsVMsiAB4BzwCfAb8Dvuq4LxPsB5EXgecnGYcbQVLF7VIrRZgmTbTBKnn4JXFAyPAe8ALwrkHeBPeB14FPgHvAZcABck7MeMnmkd/kQYC6DPKhbxc03Zrbv7jvAQ8CvwMvALa15EfgA+Ai4bWZH7n4deEn6VmVJUpcqg7n7dwVgWwWldlF/ALxiZn/8a+D+NvC4Avp7M3sr3LsC3NQzZ9nzGl3H+c5UPTJR0qpj4BLwlF667e4G3AAeAR4Ebrh75e7bsntGWTopPG+h2DY9wrho1MBlfZ/o855AT4C/ZJ/uXV6S/Wtte+64ey32KmXWbeAXAayBS+5eAXfW1fb01bKRpOEq8CzwNXBgZhN3/wqYmlnr7mPgCvCqKsfdkJEsKWW9cpFq5LxQmM8DTwJvmtlhiKfXgKm77wMzM/vR3X+WlJwVq1WBAF9lK7seVW6ADwVqZGYd8LAA7wJ7Ztbp3n3JxpkFAOrQUC4FZlkXULqXNG7X3XelZ2Nt257mLmS10XqADVb+boFhp7b5MXcfAe+plW5CFr6jdefc/Q3gCWnY/UIt9oIsLRTYZFgXalkS35/0/WnVQAtbUutlZ4EfxOSjmYi6HJwUKowB00XAIogu9FKxZHmm5JZpk4dDS6mCVBnY/5zE+5rESTjxxJ5stiRGYzzmoNNZ4LBPLoYI7JGYq7OudMhpx7L4TL3/0TL7IcC6AG58gkOsh254XOjLTgwsFfTUsuyEjFoEMt5rZFMJFOs4JeVxcxyyNfVsbQbQQotdhWLfrnIaX/UknmQhlZcmnA1yxlolSTeUpdMAyzNsukLw838DG9QdbMr/Y2sfG/tXZxPUeZOAzf8BrEJf1rWq/WcAAAAASUVORK5CYII=" alt="" style="height:38px; width:auto; vertical-align:middle; margin-right:8px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));"><span style="vertical-align:middle;">Clínica Hope</span>
+      <span class="header-badge">
+        <span class="status-dot" id="status-dot"></span>
+        <span id="badge-dinamico">Carregando...</span>
+      </span>
+    </div>
+  </div>
+
+  <div id="content-area">
+    
+    <!-- ========== MENU PRINCIPAL ========== -->
+    <div id="view-MenuPrincipal" class="view-section active">
+      <div class="menu-container">
+        <div class="menu-header">
+          <h3>Bem-vindo(a)</h3>
+          <p style="color: var(--text-muted);">Selecione uma opção:</p>
         </div>
-    </div>
-
-    <div id="appContainer">
-        <iframe 
-            id="appFrame" 
-            src="https://script.google.com/macros/s/AKfycbzSyj6uMarqX5smdecFCcTu-mKx8MLN8dzO1V7vaX3do0quHSNRSHSMf0wHqk5fxBpz/exec"
-            allow="clipboard-write"
-            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-top-navigation"
-        ></iframe>
-    </div>
-
-    <div id="installBanner">
-        <button class="btn-dismiss" onclick="dismissInstall()">&#10005;</button>
-        <div class="install-content">
-            <span class="install-icon">&#128242;</span>
-            <div class="install-text">
-                <strong>Instalar Hope Clínica</strong>
-                <small>Acesse direto do desktop ou celular</small>
-            </div>
-            <button class="btn-install" onclick="installApp()">INSTALAR</button>
+        <div class="grid-expansivo">
+          <div class="menu-item" onclick="navigateTo('RegistroSessao')">
+            <div class="icon-wrapper">📝</div>
+            <h5>Registro de Sessão</h5>
+          </div>
+          <div class="menu-item" onclick="navigateTo('Painel')">
+            <div class="icon-wrapper">📅</div>
+            <h5>Minha Agenda</h5>
+          </div>
+          <div class="menu-item" onclick="navigateTo('Alta')">
+            <div class="icon-wrapper">🚪</div>
+            <h5>Dar Alta</h5>
+          </div>
+          <div class="menu-item" onclick="navigateTo('NotaFiscal')">
+            <div class="icon-wrapper">🧾</div>
+            <h5>Financeiro</h5>
+          </div>
+          <div class="menu-item" onclick="navigateTo('ValorReceber')">
+            <div class="icon-wrapper">💰</div>
+            <h5>Valor a Receber</h5>
+          </div>
         </div>
+      </div>
     </div>
 
-    <script>
-        var iframe = document.getElementById('appFrame');
-        var container = document.getElementById('appContainer');
+    <!-- ========== VALOR A RECEBER ========== -->
+    <div id="view-ValorReceber" class="view-section">
+      <div class="form-box" style="border: 3px dashed var(--danger); background-color: #fffbfb;">
+        <h3 style="text-align:center; color:var(--danger);">💰 A Receber</h3>
+        <p style="font-size:1rem; color:#b71c1c; text-align:center; margin-bottom:20px; padding:14px; background:var(--danger-light); border-radius:12px;">
+          ⚠️ <b>Área Confidencial</b><br>Uso exclusivo.
+        </p>
+        <div style="display:flex; gap:10px;">
+          <select class="form-control" id="rec-mes" style="margin-bottom:0; flex:2;">
+            <option value="">Mês</option>
+            <option>JANEIRO</option><option>FEVEREIRO</option><option>MARCO</option><option>ABRIL</option><option>MAIO</option><option>JUNHO</option>
+            <option>JULHO</option><option>AGOSTO</option><option>SETEMBRO</option><option>OUTUBRO</option><option>NOVEMBRO</option><option>DEZEMBRO</option>
+          </select>
+          <input type="number" class="form-control" id="rec-ano" placeholder="Ano" style="margin-bottom:0; flex:1; text-align:center;">
+        </div>
+        <button class="btn-submit" onclick="baixarValorReceber()" style="background-color: var(--danger); margin-top:25px;">🔒 Gerar Relatório</button>
+        <button onclick="navigateTo('MenuPrincipal')" class="btn-voltar">Voltar ao Menu</button>
+      </div>
+    </div>
 
-        function resizeIframe() {
-            var w = window.innerWidth;
-            var h = window.innerHeight;
-            iframe.style.width = w + 'px';
-            iframe.style.height = h + 'px';
-            container.style.width = w + 'px';
-            container.style.height = h + 'px';
-        }
-
-        resizeIframe();
-        window.addEventListener('resize', resizeIframe);
-        window.addEventListener('orientationchange', function() {
-            setTimeout(resizeIframe, 200);
-        });
-
-        var loading = document.getElementById('loadingScreen');
+    <!-- ========== REGISTRO DE SESSÃO ========== -->
+    <div id="view-RegistroSessao" class="view-section">
+      <div class="form-box">
+        <h3 style="text-align:center; color:var(--primary); margin-bottom:22px;">Registro de Sessão</h3>
         
-        iframe.addEventListener('load', function() {
-            setTimeout(function() {
-                loading.classList.add('hide');
-                setTimeout(function() { if (loading.parentNode) loading.remove(); }, 600);
-            }, 800);
+        <!-- Filtro de mês/ano da guia -->
+        <div style="background: #fff5f5; border: 2px solid #ffcccc; padding: 14px; border-radius: var(--radius); margin-bottom: 20px;">
+          <label style="color: var(--danger); text-transform: uppercase; font-size: 0.85rem;">🚩 Guia gerada em:</label>
+          <div style="display:flex; gap:10px;">
+            <select id="filtro-mes-central" class="form-control" style="margin-bottom:0; flex:2; border-color: #ffcccc;">
+              <option value="1">JANEIRO</option><option value="2">FEVEREIRO</option><option value="3">MARÇO</option>
+              <option value="4">ABRIL</option><option value="5">MAIO</option><option value="6">JUNHO</option>
+              <option value="7">JULHO</option><option value="8">AGOSTO</option><option value="9">SETEMBRO</option>
+              <option value="10">OUTUBRO</option><option value="11">NOVEMBRO</option><option value="12">DEZEMBRO</option>
+            </select>
+            <input type="number" id="filtro-ano-central" class="form-control" style="margin-bottom:0; flex:1; text-align:center; border-color: #ffcccc;">
+          </div>
+        </div>
+
+        <label>Paciente</label>
+        <select id="reg-paciente" class="form-control"><option>Carregando...</option></select>
+        
+        <label>Número da Guia</label>
+        <select id="reg-guia" class="form-control">
+          <option value="">Selecione o paciente e data...</option>
+        </select>
+
+        <div id="container-guias-existentes" style="display:none; margin-top:8px; margin-bottom:14px; padding:12px; background:#f0f7f4; border:1px solid #d1e7dd; border-radius:10px;">
+          <small style="color:#0f5132; font-weight:bold; display:block; margin-bottom:4px;">✅ Guias já registradas:</small>
+          <span id="lista-guias-salvas" style="font-size: 0.88rem; color: #155724; word-break: break-all;"></span>
+        </div>
+        
+        <label>Status</label>
+        <select id="reg-tipo" class="form-control" onchange="checkTipoAtendimento()">
+          <option value="Sessão realizada">✅ Sessão realizada</option>
+          <option value="Sem comparecimento (justificado)">🚫 Falta</option>
+        </select>
+        
+        <div id="div-atestado" style="display:none; background:var(--warning-light); padding:16px; border-radius:var(--radius); margin-bottom:20px;">
+          <label>Anexar Atestado*</label>
+          <input type="file" id="reg-arquivo-atestado" class="form-control" accept="image/*,application/pdf" style="margin-bottom:0;">
+        </div>
+        
+        <label>Qtd. Sessões</label>
+        <input type="number" id="reg-qtd" class="form-control" value="1" min="0" oninput="gerarDatas()">
+        <div id="container-datas" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:12px; margin-bottom:20px;"></div>
+        
+        <label>Foto da Guia Assinada*</label>
+        <input type="file" id="reg-arquivo-guia" class="form-control" accept="image/*">
+        
+        <label>Observações (Opcional)</label>
+        <textarea id="reg-obs" class="form-control" rows="2" placeholder="Observações..."></textarea>
+        
+        <button id="btn-reg-salvar" class="btn-submit" onclick="salvarRegistro()">Salvar Registro</button>
+        <button onclick="navigateTo('MenuPrincipal')" class="btn-voltar">Voltar</button>
+
+        <!-- Baixar Fechamento -->
+        <div style="margin-top: 40px; border-top: 3px dashed #eee; padding-top: 25px;">
+          <h4 style="text-align:center; color:var(--warning); margin:0 0 18px 0; font-size:1.3rem;">📥 Baixar Fechamento</h4>
+          <div style="display:flex; gap:10px;">
+            <select class="form-control" id="rel-mes" style="margin-bottom:0; flex:2;">
+              <option value="">Mês</option><option>JANEIRO</option><option>FEVEREIRO</option><option>MARCO</option><option>ABRIL</option><option>MAIO</option><option>JUNHO</option><option>JULHO</option><option>AGOSTO</option><option>SETEMBRO</option><option>OUTUBRO</option><option>NOVEMBRO</option><option>DEZEMBRO</option>
+            </select>
+            <input type="number" class="form-control" id="rel-ano" placeholder="Ano" style="margin-bottom:0; flex:1; text-align:center;">
+          </div>
+          <button class="btn-submit" style="background-color: var(--warning);" onclick="baixarRelatorio()">Baixar PDF</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== PAINEL (AGENDA) ========== -->
+    <div id="view-Painel" class="view-section">
+      <div class="form-box" style="padding:15px; background:#f5f5f5; box-shadow:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; background:white; padding:16px; border-radius:var(--radius); border:1px solid #ddd;">
+          <h3 style="color:var(--primary); margin:0; font-size:1.4rem;">📅 Agenda</h3>
+          <button onclick="navigateTo('MenuPrincipal')" style="padding:10px 20px; border-radius:10px; border:none; background:#eee; cursor:pointer; font-weight:bold;">Voltar</button>
+        </div>
+        <div id="loading" style="text-align:center; padding:40px; color:var(--text-muted); font-size:1.2rem;">🔄 Carregando agenda...</div>
+        <div id="agenda-grid" class="grid-expansivo" style="align-items: start;"></div>
+      </div>
+    </div>
+
+    <!-- ========== DAR ALTA ========== -->
+    <div id="view-Alta" class="view-section">
+      <div class="form-box">
+        <h3 style="text-align:center; color:var(--danger); margin-bottom:22px;">🚪 Dar Alta</h3>
+        <label>Paciente</label>
+        <select id="alta-paciente" class="form-control"><option>Carregando...</option></select>
+        <label>Motivo</label>
+        <select id="alta-motivo" class="form-control">
+          <option>Alta Terapêutica</option><option>Desistência</option><option>Financeiro</option><option>Outro</option>
+        </select>
+        <button class="btn-submit" style="background:var(--danger);" onclick="processarAlta()">Confirmar Alta</button>
+        <button onclick="navigateTo('MenuPrincipal')" class="btn-voltar">Voltar</button>
+      </div>
+    </div>
+
+    <!-- ========== FINANCEIRO ========== -->
+    <div id="view-NotaFiscal" class="view-section">
+      <div class="form-box">
+        <h3 style="text-align:center; color:var(--primary); margin-bottom:22px;">🧾 Financeiro</h3>
+        <div class="doc-type-selector">
+          <div class="doc-option active" id="opt-nota" onclick="selectDocType('nota')">Nota Fiscal</div>
+          <div class="doc-option" id="opt-rpa" onclick="selectDocType('rpa')">RPA</div>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <select class="form-control" id="fin-mes" style="flex:2;">
+            <option>Mês</option><option>JANEIRO</option><option>FEVEREIRO</option><option>MARCO</option><option>ABRIL</option><option>MAIO</option><option>JUNHO</option><option>JULHO</option><option>AGOSTO</option><option>SETEMBRO</option><option>OUTUBRO</option><option>NOVEMBRO</option><option>DEZEMBRO</option>
+          </select>
+          <input type="number" class="form-control" id="fin-ano" placeholder="Ano" style="flex:1; text-align:center;">
+        </div>
+        <input type="number" class="form-control" id="fin-valor" placeholder="Valor (R$)">
+        <label>Anexar Documento*</label>
+        <input type="file" class="form-control" id="fin-arquivo" accept="image/*,application/pdf">
+        <button id="btn-save-fin" class="btn-submit" onclick="salvarDocumentoReal()">Enviar Comprovante</button>
+        <button onclick="navigateTo('MenuPrincipal')" class="btn-voltar">Voltar</button>
+        <h4 style="margin-top:35px; color:#555; border-bottom:1px solid #eee; padding-bottom:10px;">Histórico Recente</h4>
+        <div id="historico-financeiro"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal WhatsApp -->
+<div id="modal-whats">
+  <div class="box">
+    <h3 style="color:var(--primary); margin-top:0; font-size:1.5rem;">Enviar WhatsApp</h3>
+    <p id="txt-paciente-whats" style="color:var(--text-muted); margin-bottom:20px; font-size:1.2rem; font-weight:bold;"></p>
+    <button class="btn-whats-opt" style="background:#25D366;" id="btn-presenca">✅ Confirmar Presença</button>
+    <button class="btn-whats-opt" style="background:var(--primary);" id="btn-token">🔑 Solicitar Token</button>
+    <button class="btn-whats-opt" style="background:var(--danger);" id="btn-Falta">❌ Avisar Falta</button>
+    <button class="btn-whats-opt" style="background:#f0f0f0; color:var(--text); margin-top:12px;" onclick="fecharModalWhats()">Cancelar</button>
+  </div>
+</div>
+
+
+<script>
+/* =========================================
+   SISTEMA DE TIMEOUT E DESTRAVAMENTO
+   ========================================= */
+window.salvamentoEmAndamento = false;
+
+function destravarSistema() {
+  window.salvamentoEmAndamento = false;
+  var btns = [
+    { id: "btn-reg-salvar", text: "Salvar Registro" },
+    { id: "btn-save-fin", text: "Enviar Comprovante" }
+  ];
+  btns.forEach(function(b) {
+    var el = document.getElementById(b.id);
+    if (el) { el.disabled = false; el.innerText = b.text; }
+  });
+  Swal.fire({ title: "Destravado", text: "Tente novamente.", icon: "info", timer: 2500, showConfirmButton: false });
+}
+
+// Auto-destravamento após 35s
+setInterval(function() {
+  var btn = document.getElementById("btn-reg-salvar");
+  if (btn && btn.disabled && window.salvamentoEmAndamento) {
+    document.getElementById("btn-emergencia").style.display = 'block';
+  } else {
+    document.getElementById("btn-emergencia").style.display = 'none';
+  }
+}, 5000);
+
+/* =========================================
+   VARIÁVEIS GLOBAIS
+   ========================================= */
+var pacienteSelecionado = null;
+var whatsData = {};
+var currentDocType = 'nota';
+
+
+
+// Se o app foi instalado com sucesso (detecta mudança para standalone)
+window.matchMedia('(display-mode: standalone)').addEventListener('change', function(e) {
+  // PWA standalone mode detected
+});
+
+/* =========================================
+   ONLINE/OFFLINE DETECTION
+   ========================================= */
+function updateOnlineStatus() {
+  var bar = document.getElementById('offline-bar');
+  var dot = document.getElementById('status-dot');
+  if (navigator.onLine) {
+    bar.classList.remove('show');
+    dot.classList.remove('offline');
+  } else {
+    bar.classList.add('show');
+    dot.classList.add('offline');
+  }
+}
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+updateOnlineStatus();
+
+/* =========================================
+   COMPRESSÃO DE IMAGEM
+   ========================================= */
+function comprimirImagem(file, callback) {
+  if (!file) return callback(null);
+  if (file.type === "application/pdf") {
+    var reader = new FileReader();
+    reader.onload = function(e) { callback(e.target.result.split(',')[1]); };
+    reader.readAsDataURL(file);
+    return;
+  }
+  var reader = new FileReader();
+  reader.readAsDataURL(file);
+  reader.onload = function(event) {
+    var img = new Image();
+    img.src = event.target.result;
+    img.onload = function() {
+      var canvas = document.createElement('canvas');
+      var w = img.width, h = img.height;
+      var MAX = 1200;
+      if (w > MAX) { h *= MAX / w; w = MAX; }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      callback(canvas.toDataURL('image/jpeg', 0.6).split(',')[1]);
+    };
+  };
+}
+
+/* =========================================
+   INICIALIZAÇÃO
+   ========================================= */
+window.onload = function() {
+  // Nome dinâmico
+  google.script.run.withSuccessHandler(function(config) {
+    if (config && config.nome) document.getElementById("badge-dinamico").innerText = config.nome;
+  }).getConfiguracoesIniciais();
+
+  // Pendências financeiras
+  google.script.run.withSuccessHandler(function(status) {
+    if (status && status.codigo !== "OK") {
+      Swal.fire({
+        title: "⚠️ Pendência Financeira",
+        html: '<div style="text-align:left; color:#555;">Pendências em: <b>' + status.mesReferencia + '</b></div>',
+        icon: "warning",
+        confirmButtonText: 'Ir para Financeiro',
+        showCancelButton: true,
+        cancelButtonText: 'Fechar'
+      }).then(function(result) { if (result.isConfirmed) navigateTo('NotaFiscal'); });
+    }
+  }).verificarPendenciaFinanceira();
+
+  // Configura mês/ano atuais
+  var agora = new Date();
+  var mesAtual = agora.getMonth() + 1;
+  var anoAtual = agora.getFullYear();
+  
+  var selMes = document.getElementById("filtro-mes-central");
+  if (selMes) selMes.value = mesAtual.toString();
+  
+  var inpAno = document.getElementById("filtro-ano-central");
+  if (inpAno) inpAno.value = anoAtual.toString();
+  
+  ["fin-ano", "rec-ano", "rel-ano"].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.value = anoAtual;
+  });
+};
+
+/* =========================================
+   NAVEGAÇÃO
+   ========================================= */
+function navigateTo(view) {
+  document.querySelectorAll('.view-section').forEach(function(e) { e.classList.remove('active'); });
+  document.getElementById('view-' + view).classList.add('active');
+  if (view === 'Painel') initPainel();
+  if (view === 'RegistroSessao' || view === 'Alta') carregarPacientes();
+  if (view === 'RegistroSessao') gerarDatas();
+  if (view === 'NotaFiscal') carregarHistoricoFinanceiro();
+  window.scrollTo(0, 0);
+}
+
+/* =========================================
+   AGENDA
+   ========================================= */
+function initPainel() {
+  document.getElementById("loading").style.display = "block";
+  document.getElementById("agenda-grid").innerHTML = "";
+  google.script.run.withSuccessHandler(construirPainel).withFailureHandler(function(err) {
+    document.getElementById("loading").innerHTML = '<span style="color:var(--danger);">❌ Erro ao carregar: ' + err.message + '</span>';
+  }).getDadosDaAgenda();
+}
+
+function construirPainel(dados) {
+  document.getElementById("loading").style.display = "none";
+  var grid = document.getElementById("agenda-grid");
+  var agrupado = {};
+  
+  dados.forEach(function(reg) {
+    var dia = (reg.dia || "").trim();
+    var sala = (reg.sala || reg.SALA || "Sala Não Definida").trim();
+    if (!dia) return;
+    if (!agrupado[dia]) agrupado[dia] = {};
+    if (!agrupado[dia][sala]) agrupado[dia][sala] = [];
+    agrupado[dia][sala].push(reg);
+  });
+  
+  var diasOrdenados = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
+  
+  diasOrdenados.forEach(function(diaNome) {
+    if (!agrupado[diaNome]) return;
+    Object.keys(agrupado[diaNome]).forEach(function(salaNome) {
+      var registros = agrupado[diaNome][salaNome];
+      if (registros.length === 0) return;
+      
+      var coluna = document.createElement("div");
+      coluna.className = "day-column";
+      coluna.innerHTML = '<h4>' + diaNome + ' — ' + salaNome + '</h4>';
+      
+      registros.sort(function(a, b) { return a.horario.localeCompare(b.horario); })
+        .forEach(function(reg) { coluna.appendChild(criarCardHTML(reg)); });
+      
+      grid.appendChild(coluna);
+    });
+  });
+  
+  if (grid.children.length === 0) {
+    grid.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-muted); width:100%;">Nenhum agendamento encontrado.</div>';
+  }
+}
+
+function criarCardHTML(e) {
+  try {
+    var card = document.createElement("div");
+    
+    // LIVRE
+    if (!e.paciente || e.paciente === "💚" || e.paciente === "") {
+      card.className = "appointment-card free";
+      card.innerHTML = '<div style="font-weight:bold;">' + (e.horario || '--:--') + '</div>' +
+        '<div style="font-weight:bold; font-size:0.85em; text-transform:uppercase;">LIVRE 💚</div>';
+      card.onclick = function() { if (pacienteSelecionado) selecionarPacienteParaMover(e.dia, e.horario); };
+      return card;
+    }
+    
+    // OCUPADO
+    card.className = "appointment-card";
+    var cart = String(e.carterinha || "").trim();
+    if (cart.startsWith("025") || cart.startsWith("0025")) card.classList.add("unimed-amarelo");
+
+    var idade = calcularIdade(e.dtNascimento);
+    var textoIdade = idade ? '<span class="idade-span">(' + idade + ')</span>' : "";
+    
+    var badgeNiver = "";
+    var statusNiver = verificarAniversario(e.dtNascimento);
+    if (statusNiver === "HOJE") badgeNiver = '<span class="niver-hoje">🎂 Hoje</span>';
+    else if (statusNiver === "MES") badgeNiver = '<span class="niver-breve">🎈 Mês</span>';
+
+    var tagInicio = "";
+    if (e.dtInicio && verificarTagInicio(e.dtInicio)) {
+      tagInicio = '<div style="font-size:0.75em; color:#e67e22; font-weight:bold; margin-top:2px;">🚀 Início: ' + e.dtInicio + '</div>';
+    }
+
+    var nome = formatarNome(e.paciente);
+    var sala = e.sala || e.SALA || "";
+    
+    // Escapa aspas simples para evitar quebra no onclick
+    var esc = function(s) { return String(s || "").replace(/'/g, "\\'"); };
+    
+    card.innerHTML =
+      '<div style="display:flex; justify-content:space-between; align-items:center;">' +
+        '<div style="flex:1; line-height:1.2;">' +
+          '<div style="display:flex; align-items:center; gap:5px;">' +
+            '<span style="background:rgba(0,0,0,0.05); padding:2px 6px; border-radius:4px; font-weight:bold; font-size:0.88em;">' + e.horario + '</span>' +
+            '<strong style="font-size:0.95em;">' + nome + '</strong>' +
+          '</div>' +
+          '<div style="margin-top:3px; padding-left:2px;">' +
+            textoIdade + ' ' + badgeNiver +
+            ' <span style="font-size:0.8em; opacity:0.7;">' + (e.plano || "") + '</span>' +
+          '</div>' +
+          tagInicio +
+        '</div>' +
+        '<div class="card-actions">' +
+          '<button class="btn-card btn-move" onclick="selecionarPaciente(\'' + esc(e.paciente) + '\',\'' + esc(e.dia) + '\',\'' + esc(e.horario) + '\')">Mover</button>' +
+          '<button class="btn-card btn-whats-card" onclick="abrirModalWhats(\'' + esc(e.paciente) + '\',\'' + esc(e.dia) + '\',\'' + esc(e.horario) + '\',\'' + esc(e.telefone) + '\',\'' + esc(e.carterinha) + '\',\'' + esc(e.psicologa) + '\',\'' + esc(sala) + '\')">Whats</button>' +
+        '</div>' +
+      '</div>';
+    
+    return card;
+  } catch (err) {
+    console.error("Erro criarCardHTML:", err);
+    return document.createElement("div");
+  }
+}
+
+/* =========================================
+   CÁLCULOS: IDADE E ANIVERSÁRIO
+   ========================================= */
+function calcularIdade(dataNasc) {
+  if (!dataNasc || String(dataNasc).trim() === "") return "";
+  try {
+    var p = String(dataNasc).split('/');
+    if (p.length !== 3) return "";
+    var nasc = new Date(p[2], p[1] - 1, p[0]);
+    var hoje = new Date();
+    var idade = hoje.getFullYear() - nasc.getFullYear();
+    if (hoje.getMonth() < nasc.getMonth() || (hoje.getMonth() === nasc.getMonth() && hoje.getDate() < nasc.getDate())) idade--;
+    return isNaN(idade) ? "" : idade + " anos";
+  } catch (e) { return ""; }
+}
+
+function verificarAniversario(dataNasc) {
+  if (!dataNasc || String(dataNasc).trim() === "") return null;
+  try {
+    var p = String(dataNasc).split('/');
+    if (p.length !== 3) return null;
+    var hoje = new Date();
+    if (parseInt(p[1]) === hoje.getMonth() + 1 && parseInt(p[0]) === hoje.getDate()) return "HOJE";
+    if (parseInt(p[1]) === hoje.getMonth() + 1) return "MES";
+    return null;
+  } catch (e) { return null; }
+}
+
+function verificarTagInicio(dataStr) {
+  if (!dataStr) return false;
+  try {
+    var p = dataStr.split('/');
+    var d = new Date(p[2], p[1] - 1, p[0]);
+    var hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+    d.setHours(0, 0, 0, 0);
+    return hoje <= d;
+  } catch (e) { return false; }
+}
+
+function formatarNome(n) {
+  if (!n) return "";
+  var p = n.trim().split(/\s+/);
+  return p.length <= 1 ? n : p[0] + ' ' + p[p.length - 1];
+}
+
+/* =========================================
+   WHATSAPP
+   ========================================= */
+function abrirModalWhats(nome, dia, hora, telefone, carterinha, psicologa, sala) {
+  whatsData = { nome: nome, dia: dia, hora: hora, telefone: telefone, carterinha: carterinha, psicologa: psicologa, SALA: sala };
+  document.getElementById("txt-paciente-whats").innerText = "Para: " + nome;
+  document.getElementById("modal-whats").style.display = "flex";
+}
+function fecharModalWhats() { document.getElementById("modal-whats").style.display = "none"; }
+
+document.getElementById("btn-presenca").onclick = function() {
+  abrirWhats("Olá, " + whatsData.nome + "!\nAqui é a " + whatsData.psicologa + ", Psicóloga da Clínica Hope.\nTe aguardo hoje às " + whatsData.hora + ".\n\nCity Office Square - R. Najla Carone Guedert, 1080.\n" + whatsData.SALA + ". Palhoça");
+};
+document.getElementById("btn-token").onclick = function() {
+  abrirWhats("Olá *" + whatsData.nome + "*, tudo bem?\n\nPor gentileza, consegue nos encaminhar o token da carteirinha *nº " + whatsData.carterinha + "*?\nVamos solicitar a autorização junto ao plano para atendimento com a *" + whatsData.psicologa + "*.\n\nAcesse o app da Unimed, seção 'Meu Cartão (QR Code)', e nos envie um print.");
+};
+document.getElementById("btn-Falta").onclick = function() {
+  abrirWhats("Olá! Entendo que imprevistos acontecem.\n\nComo o cancelamento foi com menos de 24h de antecedência, o horário ficou reservado.\n\nNesses casos, a sessão é cobrada pela clínica. Se tiver atestado, pode enviar para registro no plano.");
+};
+
+function abrirWhats(msg) {
+  var link = "https://wa.me/55" + whatsData.telefone.replace(/\D/g, "") + "?text=" + encodeURIComponent(msg);
+  fecharModalWhats();
+  window.open(link, "_blank");
+}
+
+/* =========================================
+   MOVIMENTAÇÃO
+   ========================================= */
+function selecionarPaciente(pac, d, h) {
+  pacienteSelecionado = { paciente: pac, dia: d, hora: h };
+  Swal.fire("Selecionado", "Agora clique em um horário LIVRE 💚", "info");
+}
+function selecionarPacienteParaMover(dN, hN) {
+  if (!pacienteSelecionado) return;
+  Swal.fire({ title: "Movendo...", allowOutsideClick: false, didOpen: function() { Swal.showLoading(); } });
+  google.script.run
+    .withSuccessHandler(function(r) { Swal.fire("Sucesso", r, "success"); pacienteSelecionado = null; initPainel(); })
+    .withFailureHandler(function(e) { Swal.fire("Erro", e.message, "error"); })
+    .moverAgendamento(pacienteSelecionado.paciente, pacienteSelecionado.dia, pacienteSelecionado.hora, dN, hN);
+}
+
+/* =========================================
+   CADASTROS E REGISTROS
+   ========================================= */
+function carregarPacientes() {
+  google.script.run.withSuccessHandler(function(l) {
+    var h = '<option value="">Selecione...</option>' + l.map(function(p) { return '<option>' + p + '</option>'; }).join('');
+    document.getElementById("reg-paciente").innerHTML = h;
+    document.getElementById("alta-paciente").innerHTML = h;
+  }).getPacientes();
+}
+
+function checkTipoAtendimento() {
+  document.getElementById("div-atestado").style.display =
+    document.getElementById("reg-tipo").value === "Sem comparecimento (justificado)" ? "block" : "none";
+  gerarDatas();
+}
+
+function gerarDatas() {
+  var n = parseInt(document.getElementById("reg-qtd").value) || 0;
+  var d = document.getElementById("container-datas");
+  d.innerHTML = "";
+  for (var i = 0; i < n; i++) {
+    d.innerHTML += '<input type="date" class="form-control" style="margin-bottom:0;">';
+  }
+}
+
+function validarQuantidadeEDatas() {
+  var quantidade = parseInt(document.getElementById("reg-qtd").value) || 0;
+  var inputs = document.querySelectorAll("#container-datas input[type='date']");
+  var tipo = document.getElementById("reg-tipo").value;
+  
+  if (tipo === "Cancelar Guia / Não faturar" || tipo === "Sem comparecimento (justificado)") {
+    return { valido: true, datas: [] };
+  }
+  
+  var preenchidas = [], vazias = [];
+  inputs.forEach(function(input, idx) {
+    if (input.value && input.value.trim()) preenchidas.push(input.value);
+    else vazias.push(idx + 1);
+  });
+  
+  if (vazias.length > 0) {
+    return { valido: false, erro: "Falta preencher a data da sessão " + vazias.join(', ') + ". Você informou " + quantidade + " sessões, mas preencheu " + preenchidas.length + "." };
+  }
+  if (preenchidas.length !== quantidade) {
+    return { valido: false, erro: "Quantidade incorreta! " + quantidade + " sessões, " + preenchidas.length + " data(s)." };
+  }
+  return { valido: true, datas: preenchidas };
+}
+
+/* =========================================
+   SALVAR REGISTRO
+   ========================================= */
+function salvarRegistro() {
+  if (window.salvamentoEmAndamento) {
+    Swal.fire({ title: "Aguarde", text: "Registro sendo processado...", icon: "info", timer: 2000, showConfirmButton: false });
+    return;
+  }
+  
+  var validacao = validarQuantidadeEDatas();
+  if (!validacao.valido) {
+    Swal.fire({ title: "❌ Erro", html: validacao.erro, icon: "error", confirmButtonText: "Entendi" });
+    return;
+  }
+  
+  window.salvamentoEmAndamento = true;
+  var btn = document.getElementById("btn-reg-salvar");
+  btn.disabled = true;
+  btn.innerText = "Salvando...";
+  
+  var fG = document.getElementById("reg-arquivo-guia").files[0];
+  var fA = document.getElementById("reg-arquivo-atestado") ? document.getElementById("reg-arquivo-atestado").files[0] : null;
+  
+  comprimirImagem(fG, function(bG) {
+    var pay = {
+      paciente: document.getElementById("reg-paciente").value,
+      numeroGuia: document.getElementById("reg-guia").value,
+      tipoAtendimento: document.getElementById("reg-tipo").value,
+      quantidadeSessoes: document.getElementById("reg-qtd").value,
+      datas: validacao.datas,
+      anexoGuia: bG ? { base64: bG, mimeType: "image/jpeg" } : null,
+      observacao: document.getElementById("reg-obs").value
+    };
+    
+    if (fA) {
+      comprimirImagem(fA, function(bA) {
+        pay.anexoAtestado = { base64: bA, mimeType: "image/jpeg" };
+        enviarRegistro(pay, btn);
+      });
+    } else {
+      enviarRegistro(pay, btn);
+    }
+  });
+}
+
+function enviarRegistro(p, b) {
+  var timeout = setTimeout(function() {
+    if (window.salvamentoEmAndamento) {
+      destravarSistema();
+      Swal.fire({ title: "Tempo esgotado", html: "Servidor não respondeu em 45s.<br>Tente com foto menor.", icon: "warning" });
+    }
+  }, 45000);
+
+  google.script.run
+    .withSuccessHandler(function(r) {
+      clearTimeout(timeout);
+      window.salvamentoEmAndamento = false;
+      Swal.fire("✅ Sucesso", r, "success");
+      b.disabled = false;
+      b.innerText = "Salvar Registro";
+      
+      // Limpa campos, mantendo paciente e filtros
+      var pac = document.getElementById("reg-paciente").value;
+      var mes = document.getElementById("filtro-mes-central").value;
+      var ano = document.getElementById("filtro-ano-central").value;
+      
+      document.getElementById("reg-guia").value = "";
+      document.getElementById("reg-obs").value = "";
+      document.getElementById("reg-arquivo-guia").value = "";
+      if (document.getElementById("reg-arquivo-atestado")) document.getElementById("reg-arquivo-atestado").value = "";
+      document.getElementById("reg-qtd").value = 1;
+      
+      document.getElementById("reg-paciente").value = pac;
+      document.getElementById("filtro-mes-central").value = mes;
+      document.getElementById("filtro-ano-central").value = ano;
+      gerarDatas();
+      
+      setTimeout(function() { atualizarFiltroGuias(); }, 500);
+    })
+    .withFailureHandler(function(erro) {
+      clearTimeout(timeout);
+      window.salvamentoEmAndamento = false;
+      Swal.fire("❌ Erro", erro.message, "error");
+      b.disabled = false;
+      b.innerText = "Salvar Registro";
+    })
+    .salvarRegistroComAnexo(p);
+}
+
+/* =========================================
+   ALTA, RELATÓRIOS, FINANCEIRO
+   ========================================= */
+function processarAlta() {
+  Swal.fire({
+    title: "Confirmar Alta?",
+    text: "Esta ação não pode ser desfeita.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: '#d32f2f',
+    confirmButtonText: "Sim, dar alta",
+    cancelButtonText: "Cancelar"
+  }).then(function(result) {
+    if (result.isConfirmed) {
+      Swal.fire({ title: "Processando...", allowOutsideClick: false, didOpen: function() { Swal.showLoading(); } });
+      google.script.run.withSuccessHandler(function(r) {
+        Swal.fire("Alta", r, "success");
+        navigateTo("MenuPrincipal");
+      }).withFailureHandler(function(e) {
+        Swal.fire("Erro", e.message, "error");
+      }).darAltaPaciente(document.getElementById("alta-paciente").value, document.getElementById("alta-motivo").value);
+    }
+  });
+}
+
+function baixarRelatorio() {
+  Swal.fire({ title: "Gerando PDF...", allowOutsideClick: false, didOpen: function() { Swal.showLoading(); } });
+  google.script.run.withSuccessHandler(function(r) {
+    Swal.close();
+    if (r.success) {
+      var a = document.createElement('a');
+      a.href = 'data:application/pdf;base64,' + r.base64;
+      a.download = r.filename;
+      a.click();
+    } else {
+      Swal.fire("Erro", r.msg, "error");
+    }
+  }).gerarRelatorioFinanceiroPDF(document.getElementById('rel-mes').value, document.getElementById('rel-ano').value);
+}
+
+function baixarValorReceber() {
+  Swal.fire({ title: "Gerando relatório...", allowOutsideClick: false, didOpen: function() { Swal.showLoading(); } });
+  google.script.run.withSuccessHandler(function(r) {
+    Swal.close();
+    if (r.success) {
+      var a = document.createElement('a');
+      a.href = 'data:application/pdf;base64,' + r.base64;
+      a.download = r.filename;
+      a.click();
+    } else {
+      Swal.fire("Erro", r.msg, "error");
+    }
+  }).gerarRelatorioValorReceber(document.getElementById('rec-mes').value, document.getElementById('rec-ano').value);
+}
+
+function selectDocType(t) {
+  currentDocType = t;
+  document.querySelectorAll('.doc-option').forEach(function(e) { e.classList.remove('active'); });
+  document.getElementById('opt-' + t).classList.add('active');
+}
+
+function carregarHistoricoFinanceiro() {
+  google.script.run.withSuccessHandler(function(l) {
+    var d = document.getElementById("historico-financeiro");
+    if (!l || l.length === 0) {
+      d.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted);">Nenhum registro encontrado.</div>';
+      return;
+    }
+    d.innerHTML = l.map(function(r) {
+      return '<div style="background:#fff; border-left:4px solid var(--primary); padding:10px; margin-bottom:8px; border-radius:8px; font-size:0.9rem;">' +
+        '<strong>' + r.tipo + '</strong> — ' + r.mes + '/' + r.ano + '<br>R$ ' + r.valor + '</div>';
+    }).join('');
+  }).getHistoricoFinanceiro();
+}
+
+function salvarDocumentoReal() {
+  var f = document.getElementById("fin-arquivo").files[0];
+  if (!f) { Swal.fire("Erro", "Selecione um arquivo.", "error"); return; }
+  
+  var btn = document.getElementById("btn-save-fin");
+  btn.disabled = true;
+  btn.innerText = "Enviando...";
+  
+  comprimirImagem(f, function(b) {
+    google.script.run
+      .withSuccessHandler(function(r) {
+        btn.disabled = false;
+        btn.innerText = "Enviar Comprovante";
+        Swal.fire("Sucesso", r.msg, "success");
+        carregarHistoricoFinanceiro();
+      })
+      .withFailureHandler(function(e) {
+        btn.disabled = false;
+        btn.innerText = "Enviar Comprovante";
+        Swal.fire("Erro", e.message, "error");
+      })
+      .salvarFinanceiro({
+        tipo: currentDocType,
+        mes: document.getElementById("fin-mes").value,
+        ano: document.getElementById("fin-ano").value,
+        valor: document.getElementById("fin-valor").value,
+        arquivoBase64: b,
+        mimeType: f.type
+      });
+  });
+}
+
+/* =========================================
+   FILTRO DE GUIAS
+   ========================================= */
+function atualizarFiltroGuias() {
+  var mesSelect = document.getElementById('filtro-mes-central');
+  var anoInput = document.getElementById('filtro-ano-central');
+  var paciente = document.getElementById('reg-paciente').value;
+  var campoGuia = document.getElementById('reg-guia');
+  var areaSalvas = document.getElementById('container-guias-existentes');
+  var txtSalvas = document.getElementById('lista-guias-salvas');
+
+  if (window.salvamentoEmAndamento) return;
+
+  if (!paciente || paciente === "Carregando..." || paciente === "" || paciente === "Selecione...") {
+    campoGuia.innerHTML = '<option value="">Selecione um paciente</option>';
+    if (areaSalvas) areaSalvas.style.display = 'none';
+    return;
+  }
+  if (!mesSelect.value || !anoInput.value) {
+    campoGuia.innerHTML = '<option value="">Selecione mês e ano</option>';
+    return;
+  }
+
+  campoGuia.innerHTML = '<option value="" disabled>🔍 Buscando guias...</option>';
+
+  google.script.run
+    .withSuccessHandler(function(res) {
+      campoGuia.innerHTML = '';
+      
+      if (!res.disponiveis || res.disponiveis.length === 0) {
+        campoGuia.innerHTML = '<option value="">Nenhuma guia nova</option>';
+      } else {
+        campoGuia.innerHTML = '<option value="">Selecione a guia...</option>';
+        res.disponiveis.forEach(function(g) {
+          var opt = document.createElement('option');
+          opt.value = g;
+          opt.text = g;
+          campoGuia.add(opt);
         });
+      }
 
-        setTimeout(function() {
-            if (loading && loading.parentNode) {
-                loading.classList.add('hide');
-                setTimeout(function() { if (loading.parentNode) loading.remove(); }, 600);
-            }
-        }, 10000);
-
-        var deferredPrompt;
-
-        window.addEventListener('beforeinstallprompt', function(e) {
-            e.preventDefault();
-            deferredPrompt = e;
-            setTimeout(function() {
-                document.getElementById('installBanner').style.display = 'block';
-            }, 3000);
-        });
-
-        function installApp() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then(function() {
-                    deferredPrompt = null;
-                    dismissInstall();
-                });
-            }
+      if (res.registradas && res.registradas !== "") {
+        if (areaSalvas) {
+          areaSalvas.style.display = 'block';
+          txtSalvas.innerText = res.registradas;
         }
+      } else if (areaSalvas) {
+        areaSalvas.style.display = 'none';
+      }
+    })
+    .withFailureHandler(function(erro) {
+      campoGuia.innerHTML = '<option value="">Erro ao buscar guias</option>';
+      console.error("Erro guias:", erro);
+    })
+    .buscarGuiasDisponiveis(mesSelect.value, anoInput.value, paciente);
+}
 
-        function dismissInstall() {
-            document.getElementById('installBanner').style.display = 'none';
-        }
-
-        window.addEventListener('appinstalled', function() {
-            dismissInstall();
-        });
-
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js');
-        }
-    </script>
+/* =========================================
+   EVENT LISTENERS (com debounce)
+   ========================================= */
+document.addEventListener('DOMContentLoaded', function() {
+  ['reg-paciente', 'filtro-mes-central', 'filtro-ano-central'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) {
+      var tid;
+      el.addEventListener('change', function() {
+        clearTimeout(tid);
+        tid = setTimeout(atualizarFiltroGuias, 300);
+      });
+    }
+  });
+});
+</script>
 </body>
 </html>
