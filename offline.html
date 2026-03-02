@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clínica Hope — Offline</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', -apple-system, sans-serif;
+      background: linear-gradient(160deg, #004d40 0%, #00695c 50%, #00897b 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      text-align: center;
+      padding: 24px;
+    }
+    .offline-container {
+      max-width: 380px;
+    }
+    .offline-icon {
+      font-size: 72px;
+      margin-bottom: 24px;
+      opacity: 0.9;
+    }
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      letter-spacing: -0.02em;
+    }
+    p {
+      font-size: 1rem;
+      opacity: 0.85;
+      line-height: 1.6;
+      margin-bottom: 32px;
+    }
+    .btn-retry {
+      display: inline-block;
+      padding: 14px 36px;
+      background: rgba(255,255,255,0.15);
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 50px;
+      color: white;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+      backdrop-filter: blur(4px);
+    }
+    .btn-retry:hover { background: rgba(255,255,255,0.25); }
+    .btn-retry:active { transform: scale(0.97); }
+  </style>
+</head>
+<body>
+  <div class="offline-container">
+    <div class="offline-icon">📵</div>
+    <h1>Sem conexão</h1>
+    <p>Você está offline no momento. Verifique sua conexão com a internet e tente novamente.</p>
+    <a href="/" class="btn-retry">Tentar novamente</a>
+  </div>
+</body>
+</html>
