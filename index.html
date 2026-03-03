@@ -18,8 +18,7 @@
   <meta name="msapplication-navbutton-color" content="#004d40">
   <meta name="msapplication-TileColor" content="#004d40">
   
-  <!-- PWA Manifest -->
-  <link rel="manifest" href="manifest.json">
+  <!-- PWA Manifest (dynamic) -->
   
   <!-- Ícones -->
   <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192x192.png">
@@ -126,7 +125,38 @@
     })();
   }
   </script>
-  
+
+  <!-- Dynamic Manifest — inclui ?id= no start_url -->
+  <script>
+  (function(){
+    var params = new URLSearchParams(window.location.search);
+    var id = params.get("id");
+    var startUrl = id ? "./?id=" + id : "./";
+    
+    var manifest = {
+      "name": "Clínica Hope",
+      "short_name": "Hope",
+      "description": "Sistema de gestão da Clínica Hope",
+      "start_url": startUrl,
+      "display": "standalone",
+      "background_color": "#004d40",
+      "theme_color": "#004d40",
+      "orientation": "portrait-primary",
+      "icons": [
+        {"src": "icons/icon-192x192.png", "sizes": "192x192", "type": "image/png"},
+        {"src": "icons/icon-512x512.png", "sizes": "512x512", "type": "image/png"}
+      ]
+    };
+    
+    var blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+    var url = URL.createObjectURL(blob);
+    var link = document.createElement('link');
+    link.rel = 'manifest';
+    link.href = url;
+    document.head.appendChild(link);
+  })();
+  </script>
+
   <style>
     /* =========================================
        CSS VARIABLES — Design System Elegante
