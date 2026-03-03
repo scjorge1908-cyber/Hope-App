@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Clínica Hope</title>
+  <script>
+    // GitHub Pages SPA fix - redirect 404 to index.html
+    // Preserves the ?id= parameter
+    var path = window.location.pathname;
+    var search = window.location.search;
+    var hash = window.location.hash;
+    
+    // If we're at /Hope-App/ or /Hope-App/anything, redirect to index
+    var base = '/Hope-App/';
+    if (path.startsWith(base)) {
+      window.location.replace(base + search + hash);
+    } else {
+      window.location.replace('/' + search + hash);
+    }
+  </script>
+</head>
+<body>
+  <p>Redirecionando...</p>
+</body>
+</html>
