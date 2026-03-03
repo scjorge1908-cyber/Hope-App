@@ -55,13 +55,16 @@
   function apiCallJSONP(action, params) {
     return new Promise(function(resolve, reject) {
       var cbName = "_jpcb_" + (++_jsonpCounter) + "_" + Date.now();
+      console.log("[JSONP] Chamando:", action, "callback:", cbName);
       var timeout = setTimeout(function() {
+        console.log("[JSONP] TIMEOUT:", action);
         delete window[cbName];
         reject(new Error("Timeout: servidor não respondeu em 30s"));
       }, 30000);
 
       window[cbName] = function(response) {
         clearTimeout(timeout);
+        console.log("[JSONP] Resposta recebida para:", action, response);
         delete window[cbName];
         var tag = document.getElementById("jsonp_" + cbName);
         if (tag) tag.parentNode.removeChild(tag);
@@ -81,8 +84,9 @@
       var script = document.createElement("script");
       script.id = "jsonp_" + cbName;
       script.src = url;
-      script.onerror = function() {
+      script.onerror = function(ev) {
         clearTimeout(timeout);
+        console.error("[JSONP] SCRIPT ERROR:", action, ev);
         delete window[cbName];
         script.parentNode.removeChild(script);
         reject(new Error("Erro de rede ao conectar com o servidor"));
@@ -1299,8 +1303,10 @@ function comprimirImagem(file, callback) {
    INICIALIZAÇÃO
    ========================================= */
 window.onload = function() {
+  console.log("[INIT] window.onload disparou. API_URL:", API_URL);
   // Detecta se está no GAS (iframe)
   var isGAS = (typeof google !== 'undefined' && typeof google.script !== 'undefined');
+  console.log("[INIT] isGAS:", isGAS);
   
   if (isGAS) {
     // Funciona no GAS real E no GitHub Pages com JSONP Bridge
@@ -1344,9 +1350,19 @@ window.onload = function() {
     if (el) el.value = anoAtual;
   });
   
-  // Hide splash após 1.5s
+  // Hide splash após 1.5s (usa timer direto, não depende de onload)
   setTimeout(hideSplash, 1500);
+  // Safety: se por algum motivo não fechou, força em 4s
+  setTimeout(function() {
+    var s = document.getElementById('splash-screen');
+    if (s && s.style.display !== 'none') hideSplash();
+  }, 4000);
 };
+
+// Também dispara init se DOMContentLoaded já passou
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+  setTimeout(function() { if (window.onload) window.onload(); }, 100);
+}
 
 /* =========================================
    NAVEGAÇÃO
