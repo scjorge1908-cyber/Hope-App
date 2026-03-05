@@ -21,31 +21,82 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-  <!-- BRIDGE JSONP v21 — timeout dinâmico + URL length check -->
+  <!-- BRIDGE HÍBRIDO v22 — JSONP para leitura, fetch POST para envio grande -->
   <script>
   var API_URL="";
   (function(){var p=new URLSearchParams(window.location.search);var id=p.get("id");if(id)API_URL="https://script.google.com/macros/s/"+id+"/exec"})();
   var _jsonpCounter=0;
-  var _jsonpTimeouts={"buscarGuiasDisponiveis":60000,"salvarRegistroComAnexo":60000,"salvarFinanceiro":60000,"gerarRelatorioFinanceiroPDF":90000,"gerarRelatorioValorReceber":90000,"getDadosDaAgenda":45000};
+  var _jsonpTimeouts={"buscarGuiasDisponiveis":60000,"salvarRegistroComAnexo":90000,"salvarFinanceiro":90000,"gerarRelatorioFinanceiroPDF":90000,"gerarRelatorioValorReceber":90000,"getDadosDaAgenda":45000};
+
+  /* JSONP (GET via <script>) — para chamadas leves sem arquivos */
   function apiCallJSONP(action,params){
     return new Promise(function(resolve,reject){
       var cbName="_jpcb_"+(++_jsonpCounter)+"_"+Date.now();
-      console.log("[JSONP] Chamando:",action);
+      console.log("[JSONP] GET:",action);
       var timeoutMs=_jsonpTimeouts[action]||30000;
       var timeout=setTimeout(function(){console.log("[JSONP] TIMEOUT:",action);delete window[cbName];var tag=document.getElementById("jsonp_"+cbName);if(tag&&tag.parentNode)tag.parentNode.removeChild(tag);reject(new Error("Timeout: servidor não respondeu em "+Math.round(timeoutMs/1000)+"s"))},timeoutMs);
-      window[cbName]=function(response){clearTimeout(timeout);console.log("[JSONP] Resposta:",action);delete window[cbName];var tag=document.getElementById("jsonp_"+cbName);if(tag&&tag.parentNode)tag.parentNode.removeChild(tag);if(response&&response.success){resolve(response.data)}else{reject(new Error(response?response.error:"Erro desconhecido"))}};
+      window[cbName]=function(response){clearTimeout(timeout);console.log("[JSONP] OK:",action);delete window[cbName];var tag=document.getElementById("jsonp_"+cbName);if(tag&&tag.parentNode)tag.parentNode.removeChild(tag);if(response&&response.success){resolve(response.data)}else{reject(new Error(response?response.error:"Erro desconhecido"))}};
       var url=API_URL+"?action="+encodeURIComponent(action)+"&callback="+cbName;
       if(params)url+="&params="+encodeURIComponent(JSON.stringify(params));
-      if(url.length>8000){clearTimeout(timeout);delete window[cbName];reject(new Error("Dados muito grandes para enviar. Reduza o tamanho da foto."));return}
       var script=document.createElement("script");script.id="jsonp_"+cbName;script.src=url;
       script.onerror=function(){clearTimeout(timeout);delete window[cbName];if(script.parentNode)script.parentNode.removeChild(script);reject(new Error("Erro de rede ao conectar com o servidor"))};
       document.head.appendChild(script);
     });
   }
+
+  /* fetch POST — para chamadas com arquivos/dados grandes (sem limite de URL) */
+  function apiCallPOST(action,params){
+    return new Promise(function(resolve,reject){
+      console.log("[POST] Enviando:",action);
+      var timeoutMs=_jsonpTimeouts[action]||60000;
+      var controller=null,signal=null;
+      try{controller=new AbortController();signal=controller.signal}catch(e){}
+      var timeout=setTimeout(function(){console.log("[POST] TIMEOUT:",action);if(controller)try{controller.abort()}catch(e){}reject(new Error("Timeout: servidor não respondeu em "+Math.round(timeoutMs/1000)+"s"))},timeoutMs);
+      fetch(API_URL,{
+        method:"POST",
+        headers:{"Content-Type":"text/plain;charset=utf-8"},
+        body:JSON.stringify({action:action,params:params||{}}),
+        redirect:"follow",
+        signal:signal
+      }).then(function(resp){
+        if(!resp.ok)throw new Error("HTTP "+resp.status);
+        return resp.text();
+      }).then(function(text){
+        clearTimeout(timeout);
+        console.log("[POST] Resposta:",action,"(",text.length,"chars)");
+        try{
+          var data=JSON.parse(text);
+          if(data.success){resolve(data.data)}
+          else{reject(new Error(data.error||"Erro no servidor"))}
+        }catch(e){
+          console.error("[POST] Parse error:",text.substring(0,200));
+          reject(new Error("Resposta inválida do servidor"));
+        }
+      }).catch(function(err){
+        clearTimeout(timeout);
+        console.error("[POST] ERRO:",action,err);
+        reject(new Error(err.message||"Erro de rede"));
+      });
+    });
+  }
+
+  /* Ações que enviam dados grandes → usam POST */
+  var _postActions={"salvarRegistroComAnexo":true,"salvarFinanceiro":true};
+
+  /* Cria google.script.run falso — escolhe JSONP ou POST automaticamente */
   if(typeof google==='undefined'||typeof google.script==='undefined'){
     (function(){var _s=null,_f=null;
     var h={withSuccessHandler:function(fn){_s=fn;return h},withFailureHandler:function(fn){_f=fn;return h}};
-    function mc(a,p){var s=_s,f=_f;_s=null;_f=null;if(!API_URL){if(f)f(new Error("Modo Demo"));return}apiCallJSONP(a,p).then(function(d){if(s)s(d)}).catch(function(e){if(f)f(e);else console.error("API:",e)})}
+    function mc(a,p){
+      var s=_s,f=_f;_s=null;_f=null;
+      if(!API_URL){if(f)f(new Error("Modo Demo"));return}
+      /* Escolhe método: POST para dados grandes, JSONP para o resto */
+      var usePOST=_postActions[a]||false;
+      /* Também usa POST se payload for grande (>6000 chars encoded) */
+      if(!usePOST&&p){try{if(JSON.stringify(p).length>5000)usePOST=true}catch(e){}}
+      var call=usePOST?apiCallPOST(a,p):apiCallJSONP(a,p);
+      call.then(function(d){if(s)s(d)}).catch(function(e){if(f)f(e);else console.error("API:",e)});
+    }
     h.getConfiguracoesIniciais=function(){mc("getConfiguracoesIniciais")};
     h.verificarPendenciaFinanceira=function(){mc("verificarPendenciaFinanceira")};
     h.getDadosDaAgenda=function(){mc("getDadosDaAgenda")};
@@ -130,7 +181,7 @@ window.salvamentoEmAndamento=false;function destravarSistema(){window.salvamento
 setInterval(function(){var b=document.getElementById("btn-reg-salvar");document.getElementById("btn-emergencia").style.display=(b&&b.disabled&&window.salvamentoEmAndamento)?'block':'none'},5000);
 var pacienteSelecionado=null,whatsData={},currentDocType='nota';
 function updateOnlineStatus(){var b=document.getElementById('offline-bar'),d=document.getElementById('status-dot');if(navigator.onLine){b.classList.remove('show');if(d)d.classList.remove('offline')}else{b.classList.add('show');if(d)d.classList.add('offline')}}window.addEventListener('online',updateOnlineStatus);window.addEventListener('offline',updateOnlineStatus);updateOnlineStatus();
-function comprimirImagem(file,cb){if(!file)return cb(null);if(file.type==="application/pdf"){if(file.size>300000){Swal.fire("⚠️ PDF grande","Use PDF menor (máx 300KB) ou tire foto.","warning");return cb(null)}var r=new FileReader();r.onload=function(e){cb(e.target.result.split(',')[1])};r.readAsDataURL(file);return}var r=new FileReader();r.readAsDataURL(file);r.onload=function(ev){var img=new Image();img.src=ev.target.result;img.onload=function(){var c=document.createElement('canvas'),w=img.width,h=img.height,M=800;if(w>M){h*=M/w;w=M}if(h>M){w*=M/h;h=M}c.width=Math.round(w);c.height=Math.round(h);c.getContext('2d').drawImage(img,0,0,Math.round(w),Math.round(h));var b=c.toDataURL('image/jpeg',0.4).split(',')[1];if(b.length>180000)b=c.toDataURL('image/jpeg',0.25).split(',')[1];if(b.length>180000)b=c.toDataURL('image/jpeg',0.15).split(',')[1];if(b.length>180000){var M2=500,w2=img.width,h2=img.height;if(w2>M2){h2*=M2/w2;w2=M2}if(h2>M2){w2*=M2/h2;h2=M2}c.width=Math.round(w2);c.height=Math.round(h2);c.getContext('2d').drawImage(img,0,0,Math.round(w2),Math.round(h2));b=c.toDataURL('image/jpeg',0.2).split(',')[1]}console.log("📷 "+Math.round(b.length/1024)+"KB");cb(b)}}}
+function comprimirImagem(file,cb){if(!file)return cb(null);if(file.type==="application/pdf"){var r=new FileReader();r.onload=function(e){cb(e.target.result.split(',')[1])};r.readAsDataURL(file);return}var r=new FileReader();r.readAsDataURL(file);r.onload=function(ev){var img=new Image();img.src=ev.target.result;img.onload=function(){var c=document.createElement('canvas'),w=img.width,h=img.height,M=1200;if(w>M){h*=M/w;w=M}if(h>M){w*=M/h;h=M}c.width=Math.round(w);c.height=Math.round(h);c.getContext('2d').drawImage(img,0,0,Math.round(w),Math.round(h));var b=c.toDataURL('image/jpeg',0.6).split(',')[1];console.log("📷 "+Math.round(b.length/1024)+"KB");cb(b)}}}
 window.onload=function(){console.log("[INIT] API:",API_URL);var isGAS=(typeof google!=='undefined'&&typeof google.script!=='undefined');if(isGAS){google.script.run.withSuccessHandler(function(c){if(c&&c.nome)document.getElementById("badge-dinamico").innerText=c.nome}).withFailureHandler(function(){document.getElementById("badge-dinamico").innerText="Demo"}).getConfiguracoesIniciais();google.script.run.withSuccessHandler(function(s){if(s&&s.codigo!=="OK")Swal.fire({title:"⚠️ Pendência Financeira",html:'Pendências em: <b>'+s.mesReferencia+'</b>',icon:"warning",confirmButtonText:'Financeiro',confirmButtonColor:'#004d40',showCancelButton:true,cancelButtonText:'Fechar'}).then(function(r){if(r.isConfirmed)navigateTo('NotaFiscal')})}).withFailureHandler(function(){}).verificarPendenciaFinanceira()}else{document.getElementById("badge-dinamico").innerText="Demo"}var ag=new Date(),m=ag.getMonth()+1,a=ag.getFullYear();var sm=document.getElementById("filtro-mes-central");if(sm)sm.value=m.toString();var ia=document.getElementById("filtro-ano-central");if(ia)ia.value=a;["fin-ano","rec-ano","rel-ano"].forEach(function(id){var el=document.getElementById(id);if(el)el.value=a});setTimeout(hideSplash,1500);setTimeout(function(){var s=document.getElementById('splash-screen');if(s&&s.style.display!=='none')hideSplash()},4000)};
 if(document.readyState==='complete'||document.readyState==='interactive')setTimeout(function(){if(window.onload)window.onload()},100);
 function navigateTo(v){document.querySelectorAll('.view-section').forEach(function(e){e.classList.remove('active')});document.getElementById('view-'+v).classList.add('active');if(v==='Painel')initPainel();if(v==='RegistroSessao'||v==='Alta')carregarPacientes();if(v==='RegistroSessao')gerarDatas();if(v==='NotaFiscal')carregarHistoricoFinanceiro();window.scrollTo({top:0,behavior:'smooth'})}
@@ -152,7 +203,7 @@ function checkTipoAtendimento(){document.getElementById("div-atestado").style.di
 function gerarDatas(){var n=parseInt(document.getElementById("reg-qtd").value)||0,d=document.getElementById("container-datas");d.innerHTML="";for(var i=0;i<n;i++)d.innerHTML+='<input type="date" class="form-control" style="margin-bottom:0;">'}
 function validarQuantidadeEDatas(){var q=parseInt(document.getElementById("reg-qtd").value)||0,inp=document.querySelectorAll("#container-datas input[type='date']"),t=document.getElementById("reg-tipo").value;if(t==="Cancelar Guia / Não faturar"||t==="Sem comparecimento (justificado)")return{valido:true,datas:[]};var pr=[],vz=[];inp.forEach(function(i,idx){if(i.value&&i.value.trim())pr.push(i.value);else vz.push(idx+1)});if(vz.length>0)return{valido:false,erro:"Falta data da sessão "+vz.join(', ')};if(pr.length!==q)return{valido:false,erro:"Quantidade incorreta!"};return{valido:true,datas:pr}}
 function salvarRegistro(){if(window.salvamentoEmAndamento){Swal.fire({title:"Aguarde",text:"Processando...",icon:"info",timer:2000,showConfirmButton:false});return}var v=validarQuantidadeEDatas();if(!v.valido){Swal.fire({title:"❌ Erro",html:v.erro,icon:"error"});return}window.salvamentoEmAndamento=true;var btn=document.getElementById("btn-reg-salvar");btn.disabled=true;btn.innerText="Salvando...";var fG=document.getElementById("reg-arquivo-guia").files[0],fA=document.getElementById("reg-arquivo-atestado")?document.getElementById("reg-arquivo-atestado").files[0]:null;comprimirImagem(fG,function(bG){var pay={paciente:document.getElementById("reg-paciente").value,numeroGuia:document.getElementById("reg-guia").value||(document.getElementById("reg-guia-manual")?document.getElementById("reg-guia-manual").value:"")||"",tipoAtendimento:document.getElementById("reg-tipo").value,quantidadeSessoes:document.getElementById("reg-qtd").value,datas:v.datas,anexoGuia:bG?{base64:bG,mimeType:"image/jpeg"}:null,observacao:document.getElementById("reg-obs").value};if(fA){comprimirImagem(fA,function(bA){pay.anexoAtestado=bA?{base64:bA,mimeType:"image/jpeg"}:null;enviarRegistro(pay,btn)})}else enviarRegistro(pay,btn)})}
-function enviarRegistro(p,b){var sz=0;try{sz=JSON.stringify(p).length}catch(e){}console.log("📦 "+Math.round(sz/1024)+"KB");if(sz>250000){window.salvamentoEmAndamento=false;b.disabled=false;b.innerText="Salvar Registro";Swal.fire({title:"⚠️ Foto grande",html:"<b>"+Math.round(sz/1024)+"KB</b> (limite 250KB).<br>Use câmera frontal ou recorte.",icon:"warning",confirmButtonColor:'#004d40'});return}var to=setTimeout(function(){if(window.salvamentoEmAndamento){destravarSistema();Swal.fire({title:"Tempo esgotado",html:"Tente com foto menor.",icon:"warning"})}},60000);google.script.run.withSuccessHandler(function(r){clearTimeout(to);window.salvamentoEmAndamento=false;Swal.fire({title:"✅ Sucesso",text:r,icon:"success",confirmButtonColor:'#004d40'});b.disabled=false;b.innerText="Salvar Registro";var pac=document.getElementById("reg-paciente").value,mes=document.getElementById("filtro-mes-central").value,ano=document.getElementById("filtro-ano-central").value;document.getElementById("reg-guia").value="";document.getElementById("reg-obs").value="";document.getElementById("reg-arquivo-guia").value="";if(document.getElementById("reg-arquivo-atestado"))document.getElementById("reg-arquivo-atestado").value="";if(document.getElementById("reg-guia-manual"))document.getElementById("reg-guia-manual").value="";document.getElementById("reg-qtd").value=1;document.getElementById("reg-paciente").value=pac;document.getElementById("filtro-mes-central").value=mes;document.getElementById("filtro-ano-central").value=ano;gerarDatas();setTimeout(function(){atualizarFiltroGuias()},500)}).withFailureHandler(function(e){clearTimeout(to);window.salvamentoEmAndamento=false;Swal.fire("❌ Erro",e.message,"error");b.disabled=false;b.innerText="Salvar Registro"}).salvarRegistroComAnexo(p)}
+function enviarRegistro(p,b){var sz=0;try{sz=JSON.stringify(p).length}catch(e){}console.log("📦 Payload: "+Math.round(sz/1024)+"KB");var to=setTimeout(function(){if(window.salvamentoEmAndamento){destravarSistema();Swal.fire({title:"Tempo esgotado",html:"Tente novamente.",icon:"warning"})}},90000);google.script.run.withSuccessHandler(function(r){clearTimeout(to);window.salvamentoEmAndamento=false;Swal.fire({title:"✅ Sucesso",text:r,icon:"success",confirmButtonColor:'#004d40'});b.disabled=false;b.innerText="Salvar Registro";var pac=document.getElementById("reg-paciente").value,mes=document.getElementById("filtro-mes-central").value,ano=document.getElementById("filtro-ano-central").value;document.getElementById("reg-guia").value="";document.getElementById("reg-obs").value="";document.getElementById("reg-arquivo-guia").value="";if(document.getElementById("reg-arquivo-atestado"))document.getElementById("reg-arquivo-atestado").value="";if(document.getElementById("reg-guia-manual"))document.getElementById("reg-guia-manual").value="";document.getElementById("reg-qtd").value=1;document.getElementById("reg-paciente").value=pac;document.getElementById("filtro-mes-central").value=mes;document.getElementById("filtro-ano-central").value=ano;gerarDatas();setTimeout(function(){atualizarFiltroGuias()},500)}).withFailureHandler(function(e){clearTimeout(to);window.salvamentoEmAndamento=false;Swal.fire("❌ Erro",e.message,"error");b.disabled=false;b.innerText="Salvar Registro"}).salvarRegistroComAnexo(p)}
 function processarAlta(){Swal.fire({title:"Confirmar Alta?",text:"Ação irreversível.",icon:"warning",showCancelButton:true,confirmButtonColor:'#c62828',confirmButtonText:"Sim, dar alta",cancelButtonText:"Cancelar"}).then(function(r){if(r.isConfirmed){Swal.fire({title:"Processando...",allowOutsideClick:false,didOpen:function(){Swal.showLoading()}});google.script.run.withSuccessHandler(function(r){Swal.fire({title:"Alta",text:r,icon:"success",confirmButtonColor:'#004d40'});navigateTo("MenuPrincipal")}).withFailureHandler(function(e){Swal.fire("Erro",e.message,"error")}).darAltaPaciente(document.getElementById("alta-paciente").value,document.getElementById("alta-motivo").value)}})}
 function baixarRelatorio(){Swal.fire({title:"Gerando PDF...",allowOutsideClick:false,didOpen:function(){Swal.showLoading()}});google.script.run.withSuccessHandler(function(r){Swal.close();if(r.success){var a=document.createElement('a');a.href='data:application/pdf;base64,'+r.base64;a.download=r.filename;a.click()}else Swal.fire("Erro",r.msg,"error")}).gerarRelatorioFinanceiroPDF(document.getElementById('rel-mes').value,document.getElementById('rel-ano').value)}
 function baixarValorReceber(){Swal.fire({title:"Gerando...",allowOutsideClick:false,didOpen:function(){Swal.showLoading()}});google.script.run.withSuccessHandler(function(r){Swal.close();if(r.success){var a=document.createElement('a');a.href='data:application/pdf;base64,'+r.base64;a.download=r.filename;a.click()}else Swal.fire("Erro",r.msg,"error")}).gerarRelatorioValorReceber(document.getElementById('rec-mes').value,document.getElementById('rec-ano').value)}
